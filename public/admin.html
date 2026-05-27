@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚙️ Jeopardy Question Editor</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="admin-page">
+
+  <div class="admin-wrapper">
+    <header class="admin-header">
+      <div class="admin-title">
+        <span class="admin-icon">⚙️</span>
+        <h1>Question Editor</h1>
+      </div>
+      <div class="admin-nav">
+        <a href="/" class="btn-back">🎮 Back to Game</a>
+        <div class="status-badge" id="status-badge">✅ Saved</div>
+      </div>
+    </header>
+
+    <div class="admin-body">
+      <!-- Categories sidebar -->
+      <aside class="admin-sidebar">
+        <div class="sidebar-header">
+          <h2>Categories</h2>
+          <span class="category-count" id="category-count">0 / 8</span>
+        </div>
+        <div id="category-list" class="category-list"></div>
+        <button class="btn-new-category" id="btn-new-cat" onclick="showNewCategoryForm()">
+          ➕ New Category
+        </button>
+        <div id="new-cat-form" class="new-cat-form hidden">
+          <input type="text" id="new-cat-name" placeholder="Category name" maxlength="30" class="admin-input">
+          <input type="text" id="new-cat-icon" placeholder="Icon emoji 🌟" maxlength="4" class="admin-input icon-input">
+          <input type="color" id="new-cat-color" value="#4ECDC4" class="admin-color-input" title="Category color">
+          <div class="form-actions">
+            <button onclick="createCategory()" class="btn-admin-action save">✅ Create</button>
+            <button onclick="hideNewCategoryForm()" class="btn-admin-action cancel">✕ Cancel</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Questions main area -->
+      <main class="admin-main">
+        <div id="welcome-msg" class="welcome-msg">
+          <div class="welcome-icon">👈</div>
+          <h2>Select a category to edit questions</h2>
+          <p>You can have up to 8 categories with 8 questions each.<br>
+          Each game randomly picks 5 categories and 5 questions per category.</p>
+        </div>
+        <div id="questions-panel" class="questions-panel hidden">
+          <div class="questions-header">
+            <div class="questions-cat-info" id="questions-cat-info"></div>
+            <div class="questions-header-actions">
+              <button onclick="editCategory()" class="btn-admin-action">✏️ Edit Category</button>
+              <button onclick="deleteCategory()" class="btn-admin-action danger">🗑️ Delete</button>
+            </div>
+          </div>
+
+          <!-- Edit category inline -->
+          <div id="edit-cat-form" class="new-cat-form hidden" style="margin-bottom: 20px;">
+            <input type="text" id="edit-cat-name" placeholder="Category name" maxlength="30" class="admin-input">
+            <input type="text" id="edit-cat-icon" placeholder="Icon emoji" maxlength="4" class="admin-input icon-input">
+            <input type="color" id="edit-cat-color" class="admin-color-input">
+            <div class="form-actions">
+              <button onclick="saveCategoryEdit()" class="btn-admin-action save">✅ Save</button>
+              <button onclick="hideEditCategoryForm()" class="btn-admin-action cancel">✕ Cancel</button>
+            </div>
+          </div>
+
+          <div id="question-list" class="question-list"></div>
+
+          <div id="add-question-section" class="add-question-section">
+            <h3>➕ Add Question</h3>
+            <div class="question-form">
+              <label>Question *</label>
+              <textarea id="new-q-text" class="admin-textarea" placeholder="What animal says MOO?" rows="2"></textarea>
+              <label>Answer *</label>
+              <textarea id="new-q-answer" class="admin-textarea" placeholder="A COW! 🐄" rows="2"></textarea>
+              <label>Hint (optional)</label>
+              <input type="text" id="new-q-hint" class="admin-input" placeholder="It lives on a farm...">
+              <button onclick="addQuestion()" class="btn-admin-action save big">✅ Add Question</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Edit question modal -->
+  <div id="edit-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>✏️ Edit Question</h2>
+      <label>Question *</label>
+      <textarea id="modal-q-text" class="admin-textarea" rows="3"></textarea>
+      <label>Answer *</label>
+      <textarea id="modal-q-answer" class="admin-textarea" rows="2"></textarea>
+      <label>Hint</label>
+      <input type="text" id="modal-q-hint" class="admin-input">
+      <div class="modal-actions">
+        <button onclick="saveQuestionEdit()" class="btn-admin-action save">✅ Save Changes</button>
+        <button onclick="closeModal()" class="btn-admin-action cancel">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+</body>
+</html>

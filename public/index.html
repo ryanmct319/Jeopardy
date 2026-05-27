@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌟 Super Jeopardy! 🌟</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ====== LANDING SCREEN ====== -->
+  <div id="screen-landing" class="screen active">
+    <div class="stars-bg"></div>
+    <div class="landing-content">
+      <div class="logo-container">
+        <div class="logo-sparkle left">✨</div>
+        <h1 class="game-logo">SUPER<br>JEOPARDY!</h1>
+        <div class="logo-sparkle right">✨</div>
+      </div>
+      <div class="logo-subtitle">🎉 End of Year Review 🎉</div>
+      <button class="btn-huge btn-start pulse-btn" onclick="goToSetup()">
+        🚀 LET'S PLAY! 🚀
+      </button>
+      <a href="admin.html" class="btn-admin">⚙️ Edit Questions</a>
+    </div>
+  </div>
+
+  <!-- ====== SETUP SCREEN ====== -->
+  <div id="screen-setup" class="screen">
+    <div class="setup-header">
+      <h2>👥 Who's Playing? 👥</h2>
+      <p>Add up to 8 players or teams!</p>
+    </div>
+    <div class="setup-container">
+      <div id="players-grid" class="players-grid"></div>
+      <button class="btn-add-player" onclick="addPlayerSlot()" id="btn-add-player">
+        ➕ Add Player
+      </button>
+    </div>
+    <div class="setup-footer">
+      <button class="btn-ghost" onclick="showScreen('screen-landing')">← Back</button>
+      <button class="btn-huge btn-go" onclick="startGame()" id="btn-start-game" disabled>
+        🎮 Start Game! 🎮
+      </button>
+    </div>
+    <div id="emoji-picker" class="emoji-picker hidden">
+      <div class="emoji-picker-grid" id="emoji-grid"></div>
+    </div>
+  </div>
+
+  <!-- ====== GAME BOARD SCREEN ====== -->
+  <div id="screen-board" class="screen">
+    <!-- Scoreboard -->
+    <div id="scoreboard" class="scoreboard"></div>
+
+    <!-- Board -->
+    <div id="game-board" class="game-board"></div>
+
+    <div class="board-footer">
+      <button class="btn-ghost small" onclick="if(confirm('End game?')) showWinner()">🏁 End Game</button>
+    </div>
+  </div>
+
+  <!-- ====== QUESTION SCREEN ====== -->
+  <div id="screen-question" class="screen">
+    <div class="question-container">
+      <div class="question-category-badge" id="q-category-badge"></div>
+      <div class="question-points-badge" id="q-points-badge"></div>
+      <div class="question-card" id="question-card">
+        <div class="question-text" id="question-text"></div>
+      </div>
+      <div class="question-actions" id="question-actions">
+        <button class="btn-reveal" onclick="revealAnswer()">
+          🔍 Show Answer!
+        </button>
+      </div>
+    </div>
+
+    <!-- Answer reveal -->
+    <div id="answer-reveal" class="answer-reveal hidden">
+      <div class="answer-label">✅ ANSWER:</div>
+      <div class="answer-text" id="answer-text"></div>
+      <div class="hint-text" id="hint-text"></div>
+      <div class="scoring-panel">
+        <div class="scoring-label">Who got it right? 🌟</div>
+        <div id="scoring-buttons" class="scoring-buttons"></div>
+        <button class="btn-nobody" onclick="nobodyGotIt()">😅 Nobody Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== WINNER SCREEN ====== -->
+  <div id="screen-winner" class="screen">
+    <div id="confetti-canvas-container"></div>
+    <div class="winner-content">
+      <div class="winner-trophy">🏆</div>
+      <h1 class="winner-title">AMAZING JOB!</h1>
+      <div id="winner-display" class="winner-display"></div>
+      <div id="final-scores" class="final-scores"></div>
+      <button class="btn-huge btn-start pulse-btn" onclick="location.reload()">
+        🎮 Play Again! 🎮
+      </button>
+    </div>
+  </div>
+
+  <!-- ====== CELEBRATION OVERLAY ====== -->
+  <div id="celebration-overlay" class="celebration-overlay hidden">
+    <div class="celebration-content">
+      <div class="celebration-emoji" id="celebration-emoji">⭐</div>
+      <div class="celebration-text" id="celebration-text">CORRECT!</div>
+      <div class="celebration-points" id="celebration-points">+100</div>
+    </div>
+  </div>
+
+  <!-- ====== WRONG OVERLAY ====== -->
+  <div id="wrong-overlay" class="wrong-overlay hidden">
+    <div class="wrong-content">
+      <div class="wrong-emoji">❌</div>
+      <div class="wrong-text">NICE TRY!</div>
+    </div>
+  </div>
+
+  <!-- Canvas for confetti -->
+  <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+  <script src="js/confetti.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

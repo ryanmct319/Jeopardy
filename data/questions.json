@@ -1,0 +1,516 @@
+{
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Animals",
+      "icon": "🐾",
+      "color": "#FF6B6B",
+      "questions": [
+        {
+          "id": "q-1-1",
+          "points": 100,
+          "question": "What animal says MOO?",
+          "answer": "A COW! 🐄",
+          "hint": "It lives on a farm and gives us milk"
+        },
+        {
+          "id": "q-1-2",
+          "points": 200,
+          "question": "What animal has a long neck and eats leaves from tall trees?",
+          "answer": "A GIRAFFE! 🦒",
+          "hint": "It is the tallest animal in the world"
+        },
+        {
+          "id": "q-1-3",
+          "points": 300,
+          "question": "What animal can change its color to hide from predators?",
+          "answer": "A CHAMELEON! 🦎",
+          "hint": "It is a type of lizard"
+        },
+        {
+          "id": "q-1-4",
+          "points": 400,
+          "question": "What do you call a baby dog?",
+          "answer": "A PUPPY! 🐶",
+          "hint": "It is small and very playful"
+        },
+        {
+          "id": "q-1-5",
+          "points": 500,
+          "question": "Which animal sleeps all winter long?",
+          "answer": "A BEAR! 🐻",
+          "hint": "This is called hibernation"
+        },
+        {
+          "id": "q-1-6",
+          "points": 100,
+          "question": "What animal has stripes and lives in Africa?",
+          "answer": "A ZEBRA! 🦓",
+          "hint": "It looks like a horse with black and white stripes"
+        },
+        {
+          "id": "q-1-7",
+          "points": 200,
+          "question": "What is the biggest animal in the ocean?",
+          "answer": "A BLUE WHALE! 🐋",
+          "hint": "It is also the biggest animal on Earth"
+        },
+        {
+          "id": "q-1-8",
+          "points": 300,
+          "question": "What animal builds dams out of sticks?",
+          "answer": "A BEAVER! 🦫",
+          "hint": "It has big front teeth and a flat tail"
+        }
+      ]
+    },
+    {
+      "id": "cat-2",
+      "name": "Colors & Shapes",
+      "icon": "🌈",
+      "color": "#4ECDC4",
+      "questions": [
+        {
+          "id": "q-2-1",
+          "points": 100,
+          "question": "What color do you get when you mix red and blue?",
+          "answer": "PURPLE! 💜",
+          "hint": "Think of grapes or lavender flowers"
+        },
+        {
+          "id": "q-2-2",
+          "points": 200,
+          "question": "How many sides does a triangle have?",
+          "answer": "3 SIDES! 📐",
+          "hint": "Count them: one, two, three"
+        },
+        {
+          "id": "q-2-3",
+          "points": 300,
+          "question": "What shape is a pizza?",
+          "answer": "A CIRCLE! ⭕",
+          "hint": "It is perfectly round with no corners"
+        },
+        {
+          "id": "q-2-4",
+          "points": 400,
+          "question": "What color is the sky on a sunny day?",
+          "answer": "BLUE! 💙",
+          "hint": "It is also the color of the ocean"
+        },
+        {
+          "id": "q-2-5",
+          "points": 500,
+          "question": "What shape has 8 sides?",
+          "answer": "AN OCTAGON! 🛑",
+          "hint": "You see this shape on stop signs"
+        },
+        {
+          "id": "q-2-6",
+          "points": 100,
+          "question": "What colors are in a rainbow?",
+          "answer": "RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET! 🌈",
+          "hint": "Think ROY G BIV"
+        },
+        {
+          "id": "q-2-7",
+          "points": 200,
+          "question": "What color do you get when you mix yellow and blue?",
+          "answer": "GREEN! 💚",
+          "hint": "It is the color of grass and leaves"
+        },
+        {
+          "id": "q-2-8",
+          "points": 300,
+          "question": "How many corners does a square have?",
+          "answer": "4 CORNERS! ⬜",
+          "hint": "All four sides are the same length"
+        }
+      ]
+    },
+    {
+      "id": "cat-3",
+      "name": "Numbers & Math",
+      "icon": "🔢",
+      "color": "#FFD93D",
+      "questions": [
+        {
+          "id": "q-3-1",
+          "points": 100,
+          "question": "What is 2 + 2?",
+          "answer": "4! 🎉",
+          "hint": "Count on your fingers: 1, 2 plus 1, 2 more"
+        },
+        {
+          "id": "q-3-2",
+          "points": 200,
+          "question": "How many fingers do you have on both hands?",
+          "answer": "10 FINGERS! ✋🤚",
+          "hint": "Count all your fingers together"
+        },
+        {
+          "id": "q-3-3",
+          "points": 300,
+          "question": "What is 5 + 3?",
+          "answer": "8! 🌟",
+          "hint": "Start at 5 and count up 3 more"
+        },
+        {
+          "id": "q-3-4",
+          "points": 400,
+          "question": "If you have 10 apples and eat 3, how many are left?",
+          "answer": "7 APPLES! 🍎",
+          "hint": "Start at 10 and count back 3"
+        },
+        {
+          "id": "q-3-5",
+          "points": 500,
+          "question": "What number comes after 19?",
+          "answer": "20! ✌️0️⃣",
+          "hint": "Count to 19 and say the next number"
+        },
+        {
+          "id": "q-3-6",
+          "points": 100,
+          "question": "How many days are in a week?",
+          "answer": "7 DAYS! 📅",
+          "hint": "Monday through Sunday"
+        },
+        {
+          "id": "q-3-7",
+          "points": 200,
+          "question": "What is half of 10?",
+          "answer": "5! 🖐️",
+          "hint": "Split 10 into two equal groups"
+        },
+        {
+          "id": "q-3-8",
+          "points": 300,
+          "question": "How many months are in a year?",
+          "answer": "12 MONTHS! 📆",
+          "hint": "January through December"
+        }
+      ]
+    },
+    {
+      "id": "cat-4",
+      "name": "Letters & Words",
+      "icon": "📚",
+      "color": "#C77DFF",
+      "questions": [
+        {
+          "id": "q-4-1",
+          "points": 100,
+          "question": "What letter does the word APPLE start with?",
+          "answer": "THE LETTER A! 🍎",
+          "hint": "It is the first letter of the alphabet"
+        },
+        {
+          "id": "q-4-2",
+          "points": 200,
+          "question": "How many letters are in the alphabet?",
+          "answer": "26 LETTERS! 🔤",
+          "hint": "Start singing the ABC song"
+        },
+        {
+          "id": "q-4-3",
+          "points": 300,
+          "question": "What is the opposite of the word HOT?",
+          "answer": "COLD! 🥶",
+          "hint": "Think about ice cream or snow"
+        },
+        {
+          "id": "q-4-4",
+          "points": 400,
+          "question": "What do we call words that describe a noun like big, small, or happy?",
+          "answer": "ADJECTIVES! 📝",
+          "hint": "They are describing words"
+        },
+        {
+          "id": "q-4-5",
+          "points": 500,
+          "question": "What letter comes right before Z in the alphabet?",
+          "answer": "THE LETTER Y! 🔤",
+          "hint": "Think of the very end of the ABC song"
+        },
+        {
+          "id": "q-4-6",
+          "points": 100,
+          "question": "What letter does BALL start with?",
+          "answer": "THE LETTER B! ⚽",
+          "hint": "It makes a buh sound"
+        },
+        {
+          "id": "q-4-7",
+          "points": 200,
+          "question": "Which of these words rhymes with CAT?",
+          "answer": "HAT, BAT, or MAT! 🎩",
+          "hint": "Listen for the same ending sound: -AT"
+        },
+        {
+          "id": "q-4-8",
+          "points": 300,
+          "question": "What are the 5 vowels in the alphabet?",
+          "answer": "A, E, I, O, U! 🗣️",
+          "hint": "They are special letters that every word needs"
+        }
+      ]
+    },
+    {
+      "id": "cat-5",
+      "name": "Nature & Weather",
+      "icon": "🌤️",
+      "color": "#06D6A0",
+      "questions": [
+        {
+          "id": "q-5-1",
+          "points": 100,
+          "question": "What do clouds produce when they are very full?",
+          "answer": "RAIN! 🌧️",
+          "hint": "You need an umbrella when this happens"
+        },
+        {
+          "id": "q-5-2",
+          "points": 200,
+          "question": "What is the closest star to Earth?",
+          "answer": "THE SUN! ☀️",
+          "hint": "It rises every morning and sets every evening"
+        },
+        {
+          "id": "q-5-3",
+          "points": 300,
+          "question": "What season comes after summer?",
+          "answer": "FALL (AUTUMN)! 🍂",
+          "hint": "Leaves change colors and fall off trees"
+        },
+        {
+          "id": "q-5-4",
+          "points": 400,
+          "question": "What do we call a very big storm with lots of spinning wind?",
+          "answer": "A TORNADO! 🌪️",
+          "hint": "It looks like a funnel coming from the sky"
+        },
+        {
+          "id": "q-5-5",
+          "points": 500,
+          "question": "What is the process called when water evaporates and comes back as rain?",
+          "answer": "THE WATER CYCLE! 💧",
+          "hint": "It goes evaporate, condense, precipitate"
+        },
+        {
+          "id": "q-5-6",
+          "points": 100,
+          "question": "What do plants need to grow?",
+          "answer": "SUNLIGHT, WATER, AND AIR! 🌱",
+          "hint": "Think about what you give a houseplant"
+        },
+        {
+          "id": "q-5-7",
+          "points": 200,
+          "question": "What is frozen rain called?",
+          "answer": "SNOW OR SLEET! ❄️",
+          "hint": "Children love to play in it and build snowmen"
+        },
+        {
+          "id": "q-5-8",
+          "points": 300,
+          "question": "What is the name of our planet?",
+          "answer": "EARTH! 🌍",
+          "hint": "We all live here — it is the third planet from the sun"
+        }
+      ]
+    },
+    {
+      "id": "cat-6",
+      "name": "Food & Nutrition",
+      "icon": "🍎",
+      "color": "#FF9F1C",
+      "questions": [
+        {
+          "id": "q-6-1",
+          "points": 100,
+          "question": "What fruit is red, round, and grows on trees?",
+          "answer": "AN APPLE! 🍎",
+          "hint": "A doctor a day keeps the doctor away"
+        },
+        {
+          "id": "q-6-2",
+          "points": 200,
+          "question": "What food group gives us energy like bread, pasta, and rice?",
+          "answer": "CARBOHYDRATES (GRAINS)! 🍞",
+          "hint": "They are often made from wheat or other grains"
+        },
+        {
+          "id": "q-6-3",
+          "points": 300,
+          "question": "What do we call the most important meal of the day?",
+          "answer": "BREAKFAST! 🥞",
+          "hint": "You eat it in the morning to start your day"
+        },
+        {
+          "id": "q-6-4",
+          "points": 400,
+          "question": "What vitamin do we get mostly from the sun and milk?",
+          "answer": "VITAMIN D! ☀️🥛",
+          "hint": "It helps make your bones strong"
+        },
+        {
+          "id": "q-6-5",
+          "points": 500,
+          "question": "How many servings of fruits and vegetables should you eat each day?",
+          "answer": "5 OR MORE! 🥦🍇",
+          "hint": "Eat a rainbow of colors every day"
+        },
+        {
+          "id": "q-6-6",
+          "points": 100,
+          "question": "What is the yellow fruit monkeys love to eat?",
+          "answer": "A BANANA! 🍌",
+          "hint": "It is long, curved, and yellow"
+        },
+        {
+          "id": "q-6-7",
+          "points": 200,
+          "question": "What drink helps make your bones and teeth strong?",
+          "answer": "MILK! 🥛",
+          "hint": "It comes from cows and has lots of calcium"
+        },
+        {
+          "id": "q-6-8",
+          "points": 300,
+          "question": "What vegetable is orange, crunchy, and rabbits love?",
+          "answer": "A CARROT! 🥕",
+          "hint": "It grows underground"
+        }
+      ]
+    },
+    {
+      "id": "cat-7",
+      "name": "My Body",
+      "icon": "🫀",
+      "color": "#FF6B9D",
+      "questions": [
+        {
+          "id": "q-7-1",
+          "points": 100,
+          "question": "What body part do you use to smell flowers?",
+          "answer": "YOUR NOSE! 👃",
+          "hint": "It is in the middle of your face"
+        },
+        {
+          "id": "q-7-2",
+          "points": 200,
+          "question": "How many bones are in the adult human body?",
+          "answer": "206 BONES! 🦴",
+          "hint": "You have more as a baby — they fuse together as you grow"
+        },
+        {
+          "id": "q-7-3",
+          "points": 300,
+          "question": "What organ pumps blood through your body?",
+          "answer": "YOUR HEART! ❤️",
+          "hint": "You can feel it beating in your chest"
+        },
+        {
+          "id": "q-7-4",
+          "points": 400,
+          "question": "What do we call the protective layer that covers our bodies?",
+          "answer": "SKIN! 🤚",
+          "hint": "It comes in many different beautiful colors"
+        },
+        {
+          "id": "q-7-5",
+          "points": 500,
+          "question": "What organ controls everything your body does?",
+          "answer": "THE BRAIN! 🧠",
+          "hint": "It lives inside your skull and never stops working"
+        },
+        {
+          "id": "q-7-6",
+          "points": 100,
+          "question": "What do you use to see the world around you?",
+          "answer": "YOUR EYES! 👀",
+          "hint": "You blink them to keep them moist"
+        },
+        {
+          "id": "q-7-7",
+          "points": 200,
+          "question": "What body part do you use to taste your food?",
+          "answer": "YOUR TONGUE! 👅",
+          "hint": "It is inside your mouth and helps you talk too"
+        },
+        {
+          "id": "q-7-8",
+          "points": 300,
+          "question": "What do your lungs help you do?",
+          "answer": "BREATHE! 💨",
+          "hint": "You do it about 20,000 times every day"
+        }
+      ]
+    },
+    {
+      "id": "cat-8",
+      "name": "Feelings & Friends",
+      "icon": "💝",
+      "color": "#A8E6CF",
+      "questions": [
+        {
+          "id": "q-8-1",
+          "points": 100,
+          "question": "What do you feel when something makes you very happy?",
+          "answer": "JOY! 😄",
+          "hint": "Your face smiles really big"
+        },
+        {
+          "id": "q-8-2",
+          "points": 200,
+          "question": "What is it called when you feel worried about something?",
+          "answer": "ANXIOUS or NERVOUS! 😰",
+          "hint": "Your tummy might feel fluttery or upset"
+        },
+        {
+          "id": "q-8-3",
+          "points": 300,
+          "question": "What do you do to show someone you care about them?",
+          "answer": "GIVE A HUG, SAY KIND WORDS, or HELP THEM! 🤗",
+          "hint": "Think about what makes you feel loved"
+        },
+        {
+          "id": "q-8-4",
+          "points": 400,
+          "question": "What should you do when someone is sad?",
+          "answer": "COMFORT THEM! 💕",
+          "hint": "You can listen, give a hug, or just be there for them"
+        },
+        {
+          "id": "q-8-5",
+          "points": 500,
+          "question": "What is the word for understanding how other people feel?",
+          "answer": "EMPATHY! 💗",
+          "hint": "It means putting yourself in someone else's shoes"
+        },
+        {
+          "id": "q-8-6",
+          "points": 100,
+          "question": "What do you say when someone gives you something?",
+          "answer": "THANK YOU! 🙏",
+          "hint": "It is a very important word to know"
+        },
+        {
+          "id": "q-8-7",
+          "points": 200,
+          "question": "What feeling do you get when someone takes your toy without asking?",
+          "answer": "ANGRY or UPSET! 😠",
+          "hint": "It is okay to feel this — talk about it!"
+        },
+        {
+          "id": "q-8-8",
+          "points": 300,
+          "question": "What is a good way to solve a problem with a friend?",
+          "answer": "TALK IT OUT or COMPROMISE! 🤝",
+          "hint": "Use your words and listen to each other"
+        }
+      ]
+    }
+  ]
+}
