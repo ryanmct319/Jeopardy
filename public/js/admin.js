@@ -277,6 +277,61 @@ async function deleteQuestion(qid) {
   }
 }
 
+// ======= EXPORT =======
+function exportQuestions() {
+  // Trigger the server's download endpoint directly
+  const a = document.createElement('a');
+  a.href = '/api/export';
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  showStatus('📥 Downloading...');
+  setTimeout(() => showStatus('✅ Saved'), 1500);
+}
+
+// ======= IMPORT =======
+async function importQuestions(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Reset the input so the same file can be re-selected if needed
+  event.target.value = '';
+
+  let parsed;
+  try {
+    const text = await file.text();
+    parsed = JSON.parse(text);
+  } catch (e) {
+    alert('❌ Could not read file — make sure it is a valid JSON file exported from this app.');
+    return;
+  }
+
+  const catCount = parsed?.categories?.length ?? '?';
+  if (!confirm(`Import "${file.name}"?\n\nThis will replace all current categories and questions with ${catCount} categories from the file.\n\nA backup of your current data will be saved automatically.`)) return;
+
+  showStatus('Importing...', 'saving');
+  try {
+    const res = await fetch('/api/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(parsed)
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      showStatus('Import failed', 'error');
+      alert(`❌ Import failed:\n${result.error}`);
+      return;
+    }
+    await loadCategories();
+    closeQuestionsPanel();
+    showStatus(`✅ Imported ${result.categories} categories`);
+  } catch (e) {
+    showStatus('Import error', 'error');
+    alert('❌ Could not connect to server.');
+  }
+}
+
 // ======= STATUS =======
 let statusTimer = null;
 function showStatus(msg, type = '') {

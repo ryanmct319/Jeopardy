@@ -158,6 +158,47 @@ app.delete('/api/questions/:qid', (req, res) => {
   res.status(404).json({ error: 'Question not found' });
 });
 
+// EXPORT — download the full questions.json
+app.get('/api/export', (req, res) => {
+  const timestamp = new Date().toISOString().slice(0, 10);
+  res.setHeader('Content-Disposition', `attachment; filename="jeopardy-questions-${timestamp}.json"`);
+  res.setHeader('Content-Type', 'application/json');
+  res.sendFile(DATA_FILE);
+});
+
+// IMPORT — upload a previously exported questions.json
+app.post('/api/import', (req, res) => {
+  const incoming = req.body;
+
+  // Validate structure
+  if (!incoming || !Array.isArray(incoming.categories)) {
+    return res.status(400).json({ error: 'Invalid file: must have a "categories" array' });
+  }
+  if (incoming.categories.length > 8) {
+    return res.status(400).json({ error: 'Too many categories (max 8)' });
+  }
+  for (const cat of incoming.categories) {
+    if (!cat.id || !cat.name || !Array.isArray(cat.questions)) {
+      return res.status(400).json({ error: `Invalid category: ${JSON.stringify(cat)}` });
+    }
+    if (cat.questions.length > 8) {
+      return res.status(400).json({ error: `Category "${cat.name}" has more than 8 questions` });
+    }
+    for (const q of cat.questions) {
+      if (!q.id || !q.question || !q.answer) {
+        return res.status(400).json({ error: `Invalid question in "${cat.name}"` });
+      }
+    }
+  }
+
+  // Backup current data before overwriting
+  const backup = path.join(__dirname, 'data', `questions-backup-${Date.now()}.json`);
+  fs.copyFileSync(DATA_FILE, backup);
+
+  writeData(incoming);
+  res.json({ success: true, categories: incoming.categories.length });
+});
+
 app.listen(PORT, () => {
   console.log(`🎮 Jeopardy server running at http://localhost:${PORT}`);
   console.log(`📝 Admin panel at http://localhost:${PORT}/admin.html`);

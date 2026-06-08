@@ -17,6 +17,13 @@
         <h1>Question Editor</h1>
       </div>
       <div class="admin-nav">
+        <button class="btn-export" onclick="exportQuestions()" title="Download all categories and questions as a JSON backup file">
+          📥 Export
+        </button>
+        <label class="btn-import" title="Load a previously exported JSON file">
+          📤 Import
+          <input type="file" id="import-file-input" accept=".json,application/json" onchange="importQuestions(event)" style="display:none">
+        </label>
         <a href="/" class="btn-back">🎮 Back to Game</a>
         <div class="status-badge" id="status-badge">✅ Saved</div>
       </div>

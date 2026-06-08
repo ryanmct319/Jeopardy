@@ -50,6 +50,32 @@ body.admin-page {
   gap: 12px;
 }
 
+.btn-export, .btn-import {
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.2);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.btn-export:hover, .btn-import:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+}
+.btn-export { border-color: rgba(0,200,100,0.4); color: #00FF88; }
+.btn-export:hover { border-color: #00FF88; box-shadow: 0 4px 14px rgba(0,255,136,0.3); }
+.btn-import { border-color: rgba(0,200,255,0.4); color: #00EEFF; }
+.btn-import:hover { border-color: #00EEFF; box-shadow: 0 4px 14px rgba(0,238,255,0.3); }
+
 .btn-back {
   background: linear-gradient(135deg, #3333CC, #6666FF);
   color: white;

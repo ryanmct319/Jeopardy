@@ -234,6 +234,15 @@ function spawnFloatParticle(x, y, text, color) {
   setTimeout(() => el.remove(), 3000);
 }
 
+// ======= HELPERS =======
+function darkenHex(hex, factor = 0.45) {
+  const h = hex.replace('#', '');
+  const r = Math.round(parseInt(h.slice(0, 2), 16) * factor);
+  const g = Math.round(parseInt(h.slice(2, 4), 16) * factor);
+  const b = Math.round(parseInt(h.slice(4, 6), 16) * factor);
+  return `rgb(${r},${g},${b})`;
+}
+
 // ======= GAME BOARD =======
 function renderBoard() {
   const board = document.getElementById('game-board');
@@ -246,8 +255,9 @@ function renderBoard() {
   state.board.forEach((cat, catIdx) => {
     const header = document.createElement('div');
     header.className = 'board-header';
-    header.style.borderColor = cat.color;
-    header.style.boxShadow = `0 0 15px ${cat.color}66`;
+    header.style.background = `linear-gradient(160deg, ${cat.color}, ${darkenHex(cat.color, 0.5)})`;
+    header.style.borderColor = 'rgba(255,255,255,0.45)';
+    header.style.boxShadow = `0 0 20px ${cat.color}88, inset 0 1px 0 rgba(255,255,255,0.25)`;
     header.style.animationDelay = `${catIdx * 0.1}s`;
     header.innerHTML = `
       <div class="header-icon">${cat.icon}</div>
