@@ -38,16 +38,13 @@ app.get('/api/categories', (req, res) => {
 // GET randomized game: 5 categories from 8, 5 questions from each pool of 8
 app.get('/api/game', (req, res) => {
   const data = readData();
-  const POINT_VALUES = [100, 200, 300, 400, 500];
-
   const selectedCats = shuffle(data.categories).slice(0, 5);
 
   const gameBoard = selectedCats.map(cat => {
-    const selectedQuestions = shuffle(cat.questions).slice(0, 5).map((q, i) => ({
-      ...q,
-      points: POINT_VALUES[i],
-      answered: false
-    }));
+    const selectedQuestions = shuffle(cat.questions)
+      .slice(0, 5)
+      .sort((a, b) => a.points - b.points)  // preserve admin-assigned values, order low→high
+      .map(q => ({ ...q, answered: false }));
     return {
       id: cat.id,
       name: cat.name,
