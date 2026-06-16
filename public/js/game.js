@@ -4,7 +4,8 @@
 
 const PLAYER_COLORS = [
   '#FF2D9B', '#00EEFF', '#FFD700', '#00FF88',
-  '#FF6B00', '#C77DFF', '#FF6B6B', '#4ECDC4'
+  '#FF6B00', '#C77DFF', '#FF6B6B', '#4ECDC4',
+  '#FF4500', '#39FF14', '#FF69B4', '#00CED1'
 ];
 
 const PLAYER_EMOJIS = [
@@ -33,37 +34,42 @@ function showScreen(id) {
 // ======= LANDING =======
 function goToSetup() {
   showScreen('screen-setup');
-  // Start with 2 player slots
+  // Start with 8 blank slots — game starts once any one has a name
   if (state.players.length === 0) {
-    addPlayerSlot();
-    addPlayerSlot();
+    for (let i = 0; i < 8; i++) addPlayerSlot(true);
+    renderPlayerSlots();
+    updateStartButton();
   }
 }
 
+const MAX_PLAYERS = 12;
+
 // ======= PLAYER SETUP =======
-function addPlayerSlot() {
-  if (state.players.length >= 8) return;
+// silent=true skips re-rendering (used when bulk-adding initial slots)
+function addPlayerSlot(silent = false) {
+  if (state.players.length >= MAX_PLAYERS) return;
 
   const idx = state.players.length;
-  const player = {
+  state.players.push({
     id: idx,
     name: '',
     emoji: PLAYER_EMOJIS[idx % PLAYER_EMOJIS.length],
-    color: PLAYER_COLORS[idx],
+    color: PLAYER_COLORS[idx % PLAYER_COLORS.length],
     score: 0
-  };
-  state.players.push(player);
-  renderPlayerSlots();
+  });
 
-  if (state.players.length >= 8) {
-    document.getElementById('btn-add-player').style.display = 'none';
+  if (!silent) {
+    renderPlayerSlots();
+    updateStartButton();
   }
+
+  const btn = document.getElementById('btn-add-player');
+  if (btn) btn.style.display = state.players.length >= MAX_PLAYERS ? 'none' : '';
 }
 
 function removePlayer(idx) {
   state.players.splice(idx, 1);
-  // Re-assign IDs
-  state.players.forEach((p, i) => { p.id = i; p.color = PLAYER_COLORS[i]; });
+  state.players.forEach((p, i) => { p.id = i; p.color = PLAYER_COLORS[i % PLAYER_COLORS.length]; });
   renderPlayerSlots();
   document.getElementById('btn-add-player').style.display = '';
   updateStartButton();
@@ -148,10 +154,12 @@ function selectEmoji(emoji) {
 
 // ======= GAME START =======
 async function startGame() {
-  // Fill empty names with defaults
-  state.players.forEach((p, i) => {
-    if (!p.name.trim()) p.name = `Player ${i + 1}`;
-  });
+  // Drop any slots left blank — only named players join the game
+  state.players = state.players.filter(p => p.name.trim().length > 0);
+  // Re-assign colors sequentially after filtering
+  state.players.forEach((p, i) => { p.id = i; p.color = PLAYER_COLORS[i % PLAYER_COLORS.length]; });
+
+  if (state.players.length === 0) return; // shouldn't happen (button is disabled)
 
   try {
     const res = await fetch('/api/game');
@@ -161,7 +169,6 @@ async function startGame() {
     return;
   }
 
-  // Reset scores
   state.players.forEach(p => { p.score = 0; });
   state.activePlayerIdx = 0;
 
