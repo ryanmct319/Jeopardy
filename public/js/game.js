@@ -18,11 +18,15 @@ const PLAYER_EMOJIS = [
   '🐋','🦈','🦅','🦚','🦜','🐬','🦩','🦒'
 ];
 
+const FINAL_VALUE = 1000; // Final Jeopardy is worth a flat $1000; nothing lost when wrong
+
 let state = {
   players: [],
   board: [],
   currentQuestion: null,
-  activePlayerIdx: 0
+  activePlayerIdx: 0,
+  finalJeopardy: null,      // the one chosen Final Jeopardy question (or null)
+  finalCorrect: new Set()   // player indices marked correct in Final Jeopardy
 };
 
 // ======= NAVIGATION =======
@@ -163,7 +167,9 @@ async function startGame() {
 
   try {
     const res = await fetch('/api/game');
-    state.board = await res.json();
+    const data = await res.json();
+    state.board = data.board;
+    state.finalJeopardy = data.finalJeopardy;
   } catch (err) {
     alert('Could not load questions. Is the server running?');
     return;
@@ -171,6 +177,7 @@ async function startGame() {
 
   state.players.forEach(p => { p.score = 0; });
   state.activePlayerIdx = 0;
+  state.finalCorrect = new Set();
 
   renderBoard();
   renderScoreboard();
@@ -187,14 +194,24 @@ function renderScoreboard() {
     const card = document.createElement('div');
     card.className = 'score-card' + (idx === state.activePlayerIdx ? ' active-player' : '');
     card.id = `score-card-${idx}`;
+    // Clicking the card body (emoji/name) selects the active player
     card.onclick = () => setActivePlayer(idx);
     card.innerHTML = `
       <div class="score-emoji">${player.emoji}</div>
       <div class="score-name">${player.name}</div>
-      <div class="score-points" id="score-pts-${idx}">${player.score}</div>
+      <div class="score-points" id="score-pts-${idx}" title="Tap to fix the score">${player.score}</div>
     `;
     card.style.background = `linear-gradient(180deg, ${player.color}22, transparent)`;
     card.style.borderColor = idx === state.activePlayerIdx ? player.color : 'transparent';
+
+    // Clicking the points number opens an inline editor (brings up the keyboard
+    // on tablets) so a mis-click when awarding points can be corrected.
+    const ptsEl = card.querySelector(`#score-pts-${idx}`);
+    ptsEl.onclick = (e) => {
+      e.stopPropagation(); // don't also trigger setActivePlayer
+      openScoreEditor(idx);
+    };
+
     sb.appendChild(card);
   });
 }
@@ -202,6 +219,35 @@ function renderScoreboard() {
 function setActivePlayer(idx) {
   state.activePlayerIdx = idx;
   renderScoreboard();
+}
+
+// Inline-edit a player's score to fix mistakes mid-game
+function openScoreEditor(idx) {
+  const ptsEl = document.getElementById(`score-pts-${idx}`);
+  if (!ptsEl || ptsEl.querySelector('input')) return; // already editing
+
+  const current = state.players[idx].score;
+  ptsEl.innerHTML = `
+    <input class="score-edit-input" type="number" inputmode="numeric"
+           value="${current}" />
+  `;
+  const input = ptsEl.querySelector('input');
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const val = parseInt(input.value, 10);
+    if (!Number.isNaN(val)) state.players[idx].score = val;
+    renderScoreboard();
+  };
+  const cancel = () => renderScoreboard();
+
+  input.onclick = (e) => e.stopPropagation();
+  input.onblur = commit;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { input.onblur = null; cancel(); }
+  };
 }
 
 function animateScoreChange(playerIdx, delta) {
@@ -384,11 +430,105 @@ function returnToBoard() {
 
   showScreen('screen-board');
 
-  // Check if all answered
+  // Check if all answered → Final Jeopardy (if there's a question), else winner
   const allDone = state.board.every(cat => cat.questions.every(q => q.answered));
   if (allDone) {
-    setTimeout(() => showWinner(), 800);
+    setTimeout(() => {
+      if (state.finalJeopardy) startFinalJeopardy();
+      else showWinner();
+    }, 800);
   }
+}
+
+// ======= FINAL JEOPARDY =======
+function startFinalJeopardy() {
+  const fj = state.finalJeopardy;
+  state.finalCorrect = new Set();
+
+  // Phase reset
+  document.getElementById('final-intro').classList.remove('hidden');
+  document.getElementById('final-question-phase').classList.add('hidden');
+  document.getElementById('final-answer-reveal').classList.add('hidden');
+  document.getElementById('final-q-actions').style.display = 'flex';
+
+  // Category label
+  const catLabel = fj.category && fj.category.trim() ? fj.category : 'Final Jeopardy';
+  document.getElementById('final-category').textContent = `📋 ${catLabel}`;
+
+  // Standings (sorted high → low)
+  const standings = document.getElementById('final-standings');
+  standings.innerHTML = '';
+  [...state.players]
+    .sort((a, b) => b.score - a.score)
+    .forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'final-standing-row';
+      row.innerHTML = `
+        <span class="fst-emoji">${p.emoji}</span>
+        <span class="fst-name">${p.name}</span>
+        <span class="fst-pts">$${p.score}</span>
+      `;
+      standings.appendChild(row);
+    });
+
+  showScreen('screen-final');
+  setTimeout(() => Confetti.burst(window.innerWidth / 2, window.innerHeight / 3, 60, 18), 300);
+}
+
+function finalRevealQuestion() {
+  const fj = state.finalJeopardy;
+  document.getElementById('final-intro').classList.add('hidden');
+  document.getElementById('final-question-phase').classList.remove('hidden');
+
+  const catLabel = fj.category && fj.category.trim() ? fj.category : 'Final Jeopardy';
+  document.getElementById('final-q-category').textContent = `📋 ${catLabel}`;
+  document.getElementById('final-question-text').textContent = fj.question;
+  document.getElementById('final-answer-text').textContent = fj.answer;
+  document.getElementById('final-hint-text').textContent = fj.hint ? `💡 Hint: ${fj.hint}` : '';
+
+  document.getElementById('final-answer-reveal').classList.add('hidden');
+  document.getElementById('final-q-actions').style.display = 'flex';
+}
+
+function finalRevealAnswer() {
+  document.getElementById('final-q-actions').style.display = 'none';
+  document.getElementById('final-answer-reveal').classList.remove('hidden');
+
+  // Build a toggle button per player — tap everyone who got it right
+  const btns = document.getElementById('final-scoring-buttons');
+  btns.innerHTML = '';
+  state.players.forEach((player, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-score-player final-pick';
+    btn.id = `final-pick-${idx}`;
+    btn.style.borderColor = player.color;
+    btn.style.color = player.color;
+    btn.innerHTML = `
+      <span class="p-emoji">${player.emoji}</span>
+      <span class="p-name">${player.name}</span>
+      <span class="p-check">＋$${FINAL_VALUE}</span>
+    `;
+    btn.onclick = () => toggleFinalCorrect(idx);
+    btns.appendChild(btn);
+  });
+}
+
+function toggleFinalCorrect(idx) {
+  const btn = document.getElementById(`final-pick-${idx}`);
+  if (state.finalCorrect.has(idx)) {
+    state.finalCorrect.delete(idx);
+    btn.classList.remove('picked');
+  } else {
+    state.finalCorrect.add(idx);
+    btn.classList.add('picked');
+  }
+}
+
+function finalApplyAndFinish() {
+  state.finalCorrect.forEach(idx => {
+    state.players[idx].score += FINAL_VALUE;
+  });
+  showWinner();
 }
 
 // ======= CELEBRATION EFFECTS =======

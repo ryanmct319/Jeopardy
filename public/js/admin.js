@@ -36,7 +36,7 @@ function renderCategoryList() {
     item.innerHTML = `
       <span class="cat-item-icon">${cat.icon}</span>
       <span class="cat-item-name">${cat.name}</span>
-      <span class="cat-item-count">${cat.questions.length}/8</span>
+      <span class="cat-item-count">${cat.questions.length}/10</span>
     `;
     item.onclick = () => openCategory(cat.id);
     list.appendChild(item);
@@ -45,6 +45,8 @@ function renderCategoryList() {
 
 function openCategory(catId) {
   activeCatId = catId;
+  document.getElementById('btn-final-jeopardy').classList.remove('active');
+  document.getElementById('final-panel').classList.add('hidden');
   renderCategoryList();
 
   const cat = allCategories.find(c => c.id === catId);
@@ -54,13 +56,18 @@ function openCategory(catId) {
   document.getElementById('questions-panel').classList.remove('hidden');
   hideEditCategoryForm();
 
+  // Per-value tally so the teacher can see what's still missing
+  const tally = [100, 200, 300, 400, 500]
+    .map(v => `$${v}: ${cat.questions.filter(q => q.points === v).length}`)
+    .join('  ·  ');
+
   // Category info header
   const info = document.getElementById('questions-cat-info');
   info.innerHTML = `
     <span class="qci-icon">${cat.icon}</span>
     <div>
       <div class="qci-name" style="color: ${cat.color}">${cat.name}</div>
-      <div class="qci-count">${cat.questions.length} / 8 questions</div>
+      <div class="qci-count">${cat.questions.length} / 10 questions &nbsp;—&nbsp; ${tally}</div>
     </div>
   `;
 
@@ -68,13 +75,14 @@ function openCategory(catId) {
 
   // Show/hide add form based on count
   document.getElementById('add-question-section').style.display =
-    cat.questions.length >= 8 ? 'none' : '';
+    cat.questions.length >= 10 ? 'none' : '';
 }
 
 function closeQuestionsPanel() {
   activeCatId = null;
   document.getElementById('welcome-msg').style.display = '';
   document.getElementById('questions-panel').classList.add('hidden');
+  document.getElementById('final-panel').classList.add('hidden');
   renderCategoryList();
 }
 
@@ -87,7 +95,9 @@ function renderQuestionList(cat) {
     return;
   }
 
-  cat.questions.forEach((q, idx) => {
+  // Show low→high so the two-of-each-value structure is easy to read
+  const sorted = [...cat.questions].sort((a, b) => a.points - b.points);
+  sorted.forEach((q) => {
     const item = document.createElement('div');
     item.className = 'question-item';
     item.innerHTML = `
@@ -201,6 +211,7 @@ async function deleteCategory() {
 
 // ======= QUESTION CRUD =======
 async function addQuestion() {
+  const points = parseInt(document.getElementById('new-q-points').value, 10);
   const question = document.getElementById('new-q-text').value.trim();
   const answer = document.getElementById('new-q-answer').value.trim();
   const hint = document.getElementById('new-q-hint').value.trim();
@@ -212,7 +223,7 @@ async function addQuestion() {
     await fetch(`/api/categories/${activeCatId}/questions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, answer, hint })
+      body: JSON.stringify({ question, answer, hint, points })
     });
     document.getElementById('new-q-text').value = '';
     document.getElementById('new-q-answer').value = '';
@@ -231,6 +242,7 @@ function openEditQuestion(qid) {
   if (!q) return;
 
   editingQuestionId = qid;
+  document.getElementById('modal-q-points').value = q.points;
   document.getElementById('modal-q-text').value = q.question;
   document.getElementById('modal-q-answer').value = q.answer;
   document.getElementById('modal-q-hint').value = q.hint || '';
@@ -243,6 +255,7 @@ function closeModal() {
 }
 
 async function saveQuestionEdit() {
+  const points = parseInt(document.getElementById('modal-q-points').value, 10);
   const question = document.getElementById('modal-q-text').value.trim();
   const answer = document.getElementById('modal-q-answer').value.trim();
   const hint = document.getElementById('modal-q-hint').value.trim();
@@ -254,7 +267,7 @@ async function saveQuestionEdit() {
     await fetch(`/api/questions/${editingQuestionId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, answer, hint })
+      body: JSON.stringify({ question, answer, hint, points })
     });
     closeModal();
     await loadCategories();
@@ -271,6 +284,145 @@ async function deleteQuestion(qid) {
   try {
     await fetch(`/api/questions/${qid}`, { method: 'DELETE' });
     await loadCategories();
+    showStatus('✅ Deleted');
+  } catch (e) {
+    showStatus('Error deleting', 'error');
+  }
+}
+
+// ======= FINAL JEOPARDY =======
+let allFinal = [];
+let editingFinalId = null;
+
+async function openFinalJeopardy() {
+  activeCatId = null;
+  document.getElementById('btn-final-jeopardy').classList.add('active');
+  document.getElementById('welcome-msg').style.display = 'none';
+  document.getElementById('questions-panel').classList.add('hidden');
+  document.getElementById('final-panel').classList.remove('hidden');
+  renderCategoryList();
+  await loadFinal();
+}
+
+async function loadFinal() {
+  try {
+    const res = await fetch('/api/final');
+    allFinal = await res.json();
+    renderFinalList();
+  } catch (e) {
+    showStatus('Error loading Final Jeopardy', 'error');
+  }
+}
+
+function renderFinalList() {
+  document.getElementById('final-count').textContent = `${allFinal.length} / 5 questions`;
+  document.getElementById('add-final-section').style.display = allFinal.length >= 5 ? 'none' : '';
+
+  const list = document.getElementById('final-list');
+  list.innerHTML = '';
+
+  if (allFinal.length === 0) {
+    list.innerHTML = '<p style="color:rgba(255,255,255,0.4); text-align:center; padding:20px;">No Final Jeopardy questions yet. Add some below!</p>';
+    return;
+  }
+
+  allFinal.forEach(q => {
+    const item = document.createElement('div');
+    item.className = 'question-item';
+    item.innerHTML = `
+      <div class="q-points-badge" style="font-size:14px;">🎯</div>
+      <div class="q-content">
+        ${q.category ? `<div class="q-final-cat">📋 ${escapeHtml(q.category)}</div>` : ''}
+        <div class="q-question">${escapeHtml(q.question)}</div>
+        <div class="q-answer">✅ ${escapeHtml(q.answer)}</div>
+        ${q.hint ? `<div class="q-hint">💡 ${escapeHtml(q.hint)}</div>` : ''}
+      </div>
+      <div class="q-actions">
+        <button class="btn-q-edit" onclick="openEditFinal('${q.id}')" title="Edit">✏️</button>
+        <button class="btn-q-delete" onclick="deleteFinal('${q.id}')" title="Delete">🗑️</button>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+async function addFinal() {
+  const category = document.getElementById('new-final-category').value.trim();
+  const question = document.getElementById('new-final-q').value.trim();
+  const answer = document.getElementById('new-final-a').value.trim();
+  const hint = document.getElementById('new-final-hint').value.trim();
+
+  if (!question || !answer) { alert('Question and answer are required'); return; }
+
+  showStatus('Saving...', 'saving');
+  try {
+    const res = await fetch('/api/final', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, answer, hint, category })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      showStatus('Error saving', 'error');
+      alert(`❌ ${err.error}`);
+      return;
+    }
+    document.getElementById('new-final-category').value = '';
+    document.getElementById('new-final-q').value = '';
+    document.getElementById('new-final-a').value = '';
+    document.getElementById('new-final-hint').value = '';
+    await loadFinal();
+    showStatus('✅ Saved');
+  } catch (e) {
+    showStatus('Error saving', 'error');
+  }
+}
+
+function openEditFinal(id) {
+  const q = allFinal.find(q => q.id === id);
+  if (!q) return;
+  editingFinalId = id;
+  document.getElementById('final-modal-category').value = q.category || '';
+  document.getElementById('final-modal-q').value = q.question;
+  document.getElementById('final-modal-a').value = q.answer;
+  document.getElementById('final-modal-hint').value = q.hint || '';
+  document.getElementById('final-modal').classList.remove('hidden');
+}
+
+function closeFinalModal() {
+  document.getElementById('final-modal').classList.add('hidden');
+  editingFinalId = null;
+}
+
+async function saveFinalEdit() {
+  const category = document.getElementById('final-modal-category').value.trim();
+  const question = document.getElementById('final-modal-q').value.trim();
+  const answer = document.getElementById('final-modal-a').value.trim();
+  const hint = document.getElementById('final-modal-hint').value.trim();
+
+  if (!question || !answer) { alert('Question and answer are required'); return; }
+
+  showStatus('Saving...', 'saving');
+  try {
+    await fetch(`/api/final/${editingFinalId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, answer, hint, category })
+    });
+    closeFinalModal();
+    await loadFinal();
+    showStatus('✅ Saved');
+  } catch (e) {
+    showStatus('Error saving', 'error');
+  }
+}
+
+async function deleteFinal(id) {
+  if (!confirm('Delete this Final Jeopardy question?')) return;
+  showStatus('Deleting...', 'saving');
+  try {
+    await fetch(`/api/final/${id}`, { method: 'DELETE' });
+    await loadFinal();
     showStatus('✅ Deleted');
   } catch (e) {
     showStatus('Error deleting', 'error');
@@ -350,7 +502,10 @@ function showStatus(msg, type = '') {
 // ======= INIT =======
 document.addEventListener('DOMContentLoaded', loadCategories);
 
-// Close modal on overlay click
+// Close modals on overlay click
 document.getElementById('edit-modal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('edit-modal')) closeModal();
+});
+document.getElementById('final-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('final-modal')) closeFinalModal();
 });

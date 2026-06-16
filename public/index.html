@@ -91,6 +91,46 @@
     </div>
   </div>
 
+  <!-- ====== FINAL JEOPARDY SCREEN ====== -->
+  <div id="screen-final" class="screen">
+    <!-- Phase 1: dramatic intro + standings -->
+    <div id="final-intro" class="final-phase">
+      <div class="final-logo">🎯 FINAL JEOPARDY 🎯</div>
+      <div class="final-value-note">Worth <strong>$1000</strong> — get it right to win big! Nothing is lost if you're wrong.</div>
+      <div class="final-category-badge" id="final-category"></div>
+      <div class="final-standings-label">📊 Current Standings</div>
+      <div class="final-standings" id="final-standings"></div>
+      <button class="btn-huge btn-start pulse-btn" onclick="finalRevealQuestion()">
+        🔍 Reveal the Question!
+      </button>
+    </div>
+
+    <!-- Phase 2: the question -->
+    <div id="final-question-phase" class="final-phase hidden">
+      <div class="question-container">
+        <div class="final-category-badge" id="final-q-category"></div>
+        <div class="question-points-badge">$1000</div>
+        <div class="question-card">
+          <div class="question-text" id="final-question-text"></div>
+        </div>
+        <div class="question-actions" id="final-q-actions">
+          <button class="btn-reveal" onclick="finalRevealAnswer()">🔍 Show Answer!</button>
+        </div>
+      </div>
+
+      <div id="final-answer-reveal" class="answer-reveal hidden">
+        <div class="answer-label">✅ ANSWER:</div>
+        <div class="answer-text" id="final-answer-text"></div>
+        <div class="hint-text" id="final-hint-text"></div>
+        <div class="scoring-panel">
+          <div class="scoring-label">Tap everyone who got it right! 🌟 (+$1000 each)</div>
+          <div id="final-scoring-buttons" class="scoring-buttons"></div>
+          <button class="btn-huge btn-go" onclick="finalApplyAndFinish()">🏆 See Final Results!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ====== WINNER SCREEN ====== -->
   <div id="screen-winner" class="screen">
     <div id="confetti-canvas-container"></div>

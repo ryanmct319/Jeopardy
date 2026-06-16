@@ -13,8 +13,13 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 function readData() {
-  return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  // Backwards-compat: older files may not have finalJeopardy
+  if (!Array.isArray(data.finalJeopardy)) data.finalJeopardy = [];
+  return data;
 }
+
+const BOARD_VALUES = [100, 200, 300, 400, 500];
 
 function writeData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
@@ -35,26 +40,43 @@ app.get('/api/categories', (req, res) => {
   res.json(data.categories);
 });
 
-// GET randomized game: 5 categories from 8, 5 questions from each pool of 8
+// GET randomized game.
+// Picks 5 categories, then for EACH board value (100-500) chooses one random
+// question of that value — guaranteeing exactly one of every value and never
+// a duplicate value. With two questions per value in the pool, replays vary.
 app.get('/api/game', (req, res) => {
   const data = readData();
-  const selectedCats = shuffle(data.categories).slice(0, 5);
+
+  // Only categories that have at least one question for EVERY value are eligible,
+  // so every column is guaranteed a full set of $100–$500.
+  const eligible = data.categories.filter(cat =>
+    BOARD_VALUES.every(v => cat.questions.some(q => q.points === v))
+  );
+
+  const selectedCats = shuffle(eligible).slice(0, 5);
 
   const gameBoard = selectedCats.map(cat => {
-    const selectedQuestions = shuffle(cat.questions)
-      .slice(0, 5)
-      .sort((a, b) => a.points - b.points)  // preserve admin-assigned values, order low→high
-      .map(q => ({ ...q, answered: false }));
+    const questions = BOARD_VALUES.map(value => {
+      const pool = cat.questions.filter(q => q.points === value);
+      const chosen = pool[Math.floor(Math.random() * pool.length)];
+      return { ...chosen, answered: false };
+    });
     return {
       id: cat.id,
       name: cat.name,
       icon: cat.icon,
       color: cat.color,
-      questions: selectedQuestions
+      questions
     };
   });
 
-  res.json(gameBoard);
+  // Pick one random Final Jeopardy question, if any have been entered
+  let finalJeopardy = null;
+  if (data.finalJeopardy.length > 0) {
+    finalJeopardy = data.finalJeopardy[Math.floor(Math.random() * data.finalJeopardy.length)];
+  }
+
+  res.json({ board: gameBoard, finalJeopardy });
 });
 
 // CREATE category
@@ -106,7 +128,7 @@ app.post('/api/categories/:id/questions', (req, res) => {
   const data = readData();
   const cat = data.categories.find(c => c.id === req.params.id);
   if (!cat) return res.status(404).json({ error: 'Category not found' });
-  if (cat.questions.length >= 8) return res.status(400).json({ error: 'Maximum 8 questions per category' });
+  if (cat.questions.length >= 10) return res.status(400).json({ error: 'Maximum 10 questions per category' });
 
   const { question, answer, hint, points } = req.body;
   if (!question || !answer) return res.status(400).json({ error: 'Question and answer are required' });
@@ -155,6 +177,59 @@ app.delete('/api/questions/:qid', (req, res) => {
   res.status(404).json({ error: 'Question not found' });
 });
 
+// ===== FINAL JEOPARDY =====
+// GET all final jeopardy questions
+app.get('/api/final', (req, res) => {
+  res.json(readData().finalJeopardy);
+});
+
+// ADD final jeopardy question (max 5)
+app.post('/api/final', (req, res) => {
+  const data = readData();
+  if (data.finalJeopardy.length >= 5) return res.status(400).json({ error: 'Maximum 5 Final Jeopardy questions' });
+
+  const { question, answer, hint, category } = req.body;
+  if (!question || !answer) return res.status(400).json({ error: 'Question and answer are required' });
+
+  const newQ = {
+    id: `fj-${uuidv4()}`,
+    category: category || 'Final Jeopardy',
+    question,
+    answer,
+    hint: hint || ''
+  };
+  data.finalJeopardy.push(newQ);
+  writeData(data);
+  res.status(201).json(newQ);
+});
+
+// UPDATE final jeopardy question
+app.put('/api/final/:id', (req, res) => {
+  const data = readData();
+  const idx = data.finalJeopardy.findIndex(q => q.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Question not found' });
+
+  const { question, answer, hint, category } = req.body;
+  if (question) data.finalJeopardy[idx].question = question;
+  if (answer) data.finalJeopardy[idx].answer = answer;
+  if (hint !== undefined) data.finalJeopardy[idx].hint = hint;
+  if (category !== undefined) data.finalJeopardy[idx].category = category;
+
+  writeData(data);
+  res.json(data.finalJeopardy[idx]);
+});
+
+// DELETE final jeopardy question
+app.delete('/api/final/:id', (req, res) => {
+  const data = readData();
+  const idx = data.finalJeopardy.findIndex(q => q.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Question not found' });
+
+  data.finalJeopardy.splice(idx, 1);
+  writeData(data);
+  res.json({ success: true });
+});
+
 // EXPORT — download the full questions.json
 app.get('/api/export', (req, res) => {
   const timestamp = new Date().toISOString().slice(0, 10);
@@ -178,13 +253,27 @@ app.post('/api/import', (req, res) => {
     if (!cat.id || !cat.name || !Array.isArray(cat.questions)) {
       return res.status(400).json({ error: `Invalid category: ${JSON.stringify(cat)}` });
     }
-    if (cat.questions.length > 8) {
-      return res.status(400).json({ error: `Category "${cat.name}" has more than 8 questions` });
+    if (cat.questions.length > 10) {
+      return res.status(400).json({ error: `Category "${cat.name}" has more than 10 questions` });
     }
     for (const q of cat.questions) {
       if (!q.id || !q.question || !q.answer) {
         return res.status(400).json({ error: `Invalid question in "${cat.name}"` });
       }
+    }
+  }
+
+  // Final jeopardy is optional; default to [] and validate if present
+  if (incoming.finalJeopardy === undefined) incoming.finalJeopardy = [];
+  if (!Array.isArray(incoming.finalJeopardy)) {
+    return res.status(400).json({ error: '"finalJeopardy" must be an array' });
+  }
+  if (incoming.finalJeopardy.length > 5) {
+    return res.status(400).json({ error: 'Too many Final Jeopardy questions (max 5)' });
+  }
+  for (const q of incoming.finalJeopardy) {
+    if (!q.id || !q.question || !q.answer) {
+      return res.status(400).json({ error: 'Invalid Final Jeopardy question' });
     }
   }
 

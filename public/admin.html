@@ -49,6 +49,10 @@
             <button onclick="hideNewCategoryForm()" class="btn-admin-action cancel">✕ Cancel</button>
           </div>
         </div>
+
+        <button class="btn-final-jeopardy" id="btn-final-jeopardy" onclick="openFinalJeopardy()">
+          🎯 Final Jeopardy
+        </button>
       </aside>
 
       <!-- Questions main area -->
@@ -56,8 +60,11 @@
         <div id="welcome-msg" class="welcome-msg">
           <div class="welcome-icon">👈</div>
           <h2>Select a category to edit questions</h2>
-          <p>You can have up to 8 categories with 8 questions each.<br>
-          Each game randomly picks 5 categories and 5 questions per category.</p>
+          <p>You can have up to 8 categories with <strong>10 questions each</strong>
+          (two questions for every dollar value: $100, $200, $300, $400, $500).<br><br>
+          Each game randomly picks 5 categories and, for every dollar value, randomly
+          serves one of your two questions — so the board changes a little each replay.<br><br>
+          Don't forget to set up <strong>🎯 Final Jeopardy</strong> (up to 5 questions) using the button on the left!</p>
         </div>
         <div id="questions-panel" class="questions-panel hidden">
           <div class="questions-header">
@@ -84,6 +91,14 @@
           <div id="add-question-section" class="add-question-section">
             <h3>➕ Add Question</h3>
             <div class="question-form">
+              <label>Dollar Value *</label>
+              <select id="new-q-points" class="admin-input">
+                <option value="100">$100</option>
+                <option value="200">$200</option>
+                <option value="300">$300</option>
+                <option value="400">$400</option>
+                <option value="500">$500</option>
+              </select>
               <label>Question *</label>
               <textarea id="new-q-text" class="admin-textarea" placeholder="What animal says MOO?" rows="2"></textarea>
               <label>Answer *</label>
@@ -91,6 +106,41 @@
               <label>Hint (optional)</label>
               <input type="text" id="new-q-hint" class="admin-input" placeholder="It lives on a farm...">
               <button onclick="addQuestion()" class="btn-admin-action save big">✅ Add Question</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Final Jeopardy panel -->
+        <div id="final-panel" class="questions-panel hidden">
+          <div class="questions-header">
+            <div class="questions-cat-info">
+              <span class="qci-icon">🎯</span>
+              <div>
+                <div class="qci-name" style="color: #FFD700">Final Jeopardy</div>
+                <div class="qci-count" id="final-count">0 / 5 questions</div>
+              </div>
+            </div>
+          </div>
+          <p style="color:rgba(255,255,255,0.6); margin-bottom:18px; line-height:1.5;">
+            Add up to 5 Final Jeopardy questions. After the whole board is played, the game
+            reviews the standings and serves <strong>one of these at random</strong>, worth a flat
+            <strong style="color:#FFD700">$1000</strong> (nothing is lost for a wrong answer).
+          </p>
+
+          <div id="final-list" class="question-list"></div>
+
+          <div id="add-final-section" class="add-question-section">
+            <h3>➕ Add Final Jeopardy Question</h3>
+            <div class="question-form">
+              <label>Category Label (shown on screen)</label>
+              <input type="text" id="new-final-category" class="admin-input" placeholder="e.g. Animals, Science, Kindness" maxlength="40">
+              <label>Question *</label>
+              <textarea id="new-final-q" class="admin-textarea" placeholder="What do we call animals active at night?" rows="2"></textarea>
+              <label>Answer *</label>
+              <textarea id="new-final-a" class="admin-textarea" placeholder="NOCTURNAL ANIMALS! 🦉" rows="2"></textarea>
+              <label>Hint (optional)</label>
+              <input type="text" id="new-final-hint" class="admin-input" placeholder="Owls and bats are like this...">
+              <button onclick="addFinal()" class="btn-admin-action save big">✅ Add Final Jeopardy Question</button>
             </div>
           </div>
         </div>
@@ -102,6 +152,14 @@
   <div id="edit-modal" class="modal-overlay hidden">
     <div class="modal">
       <h2>✏️ Edit Question</h2>
+      <label>Dollar Value *</label>
+      <select id="modal-q-points" class="admin-input">
+        <option value="100">$100</option>
+        <option value="200">$200</option>
+        <option value="300">$300</option>
+        <option value="400">$400</option>
+        <option value="500">$500</option>
+      </select>
       <label>Question *</label>
       <textarea id="modal-q-text" class="admin-textarea" rows="3"></textarea>
       <label>Answer *</label>
@@ -111,6 +169,25 @@
       <div class="modal-actions">
         <button onclick="saveQuestionEdit()" class="btn-admin-action save">✅ Save Changes</button>
         <button onclick="closeModal()" class="btn-admin-action cancel">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Final Jeopardy edit modal -->
+  <div id="final-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h2 id="final-modal-title">🎯 Final Jeopardy Question</h2>
+      <label>Category Label (shown on screen)</label>
+      <input type="text" id="final-modal-category" class="admin-input" placeholder="e.g. Animals, Science, Kindness" maxlength="40">
+      <label>Question *</label>
+      <textarea id="final-modal-q" class="admin-textarea" rows="3"></textarea>
+      <label>Answer *</label>
+      <textarea id="final-modal-a" class="admin-textarea" rows="2"></textarea>
+      <label>Hint</label>
+      <input type="text" id="final-modal-hint" class="admin-input">
+      <div class="modal-actions">
+        <button onclick="saveFinalEdit()" class="btn-admin-action save">✅ Save</button>
+        <button onclick="closeFinalModal()" class="btn-admin-action cancel">✕ Cancel</button>
       </div>
     </div>
   </div>
