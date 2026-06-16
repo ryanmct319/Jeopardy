@@ -10,7 +10,11 @@ const DATA_FILE = path.join(__dirname, 'data', 'questions.json');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// no-cache forces the browser to revalidate each asset against the server,
+// so pulling new code always takes effect instead of serving a stale game.js/style.css
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res) => res.setHeader('Cache-Control', 'no-cache')
+}));
 
 function readData() {
   const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
