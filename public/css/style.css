@@ -1142,6 +1142,252 @@ body {
   text-shadow: 0 0 10px rgba(255,215,0,0.5);
 }
 
+/* ======= MODE SELECT (landing) ======= */
+.mode-select {
+  display: flex;
+  gap: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  padding: 6px;
+}
+.btn-mode {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(13px, 2.4vw, 17px);
+  font-weight: 800;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: rgba(255,255,255,0.55);
+  background: transparent;
+  letter-spacing: 0.5px;
+}
+.btn-mode.active {
+  background: linear-gradient(135deg, #FF2D9B, #FF6B00);
+  color: white;
+  box-shadow: 0 4px 16px rgba(255,45,155,0.45);
+  transform: scale(1.04);
+}
+.btn-mode:hover:not(.active) {
+  color: white;
+  background: rgba(255,255,255,0.1);
+}
+
+/* ======= CO-OP SCOREBOARD ======= */
+.coop-scoreboard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 2px solid rgba(0,200,100,0.35);
+  width: 100%;
+  flex-shrink: 0;
+}
+.coop-scoreboard.hidden { display: none; }
+
+.coop-score-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 90px;
+}
+.coop-class-name {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+.coop-score-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 30px;
+  color: var(--neon-green);
+  text-shadow: 0 0 16px var(--neon-green);
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.coop-score-num:hover { background: rgba(255,255,255,0.1); }
+
+.coop-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.coop-bar-track {
+  height: 42px;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(0,200,100,0.35);
+  border-radius: 21px;
+  overflow: hidden;
+  position: relative;
+}
+.coop-bar-bounce {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+.coop-bar-bounce.bar-excited {
+  animation: bar-bounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes bar-bounce {
+  0%   { transform: scaleY(1); }
+  25%  { transform: scaleY(1.35); }
+  55%  { transform: scaleY(0.88); }
+  75%  { transform: scaleY(1.12); }
+  100% { transform: scaleY(1); }
+}
+.coop-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #007a30, #00bb4a, #00ff88, #44ffaa, #00ff88, #00bb4a);
+  background-size: 300% 100%;
+  border-radius: 20px;
+  transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+  animation: cash-shimmer 3s linear infinite;
+}
+.coop-bar-fill::after {
+  content: '💵 💵 💵 💵 💵 💵 💵 💵 💵 💵 💵 💵 💵 💵 💵';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0.28;
+  padding-left: 6px;
+  pointer-events: none;
+  letter-spacing: 4px;
+}
+@keyframes cash-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -200% 0; }
+}
+.coop-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 700;
+  padding: 0 4px;
+}
+.coop-sack {
+  font-size: 42px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: grayscale(0.7) brightness(0.6);
+  flex-shrink: 0;
+}
+.coop-sack.sack-full {
+  filter: none;
+  animation: sack-celebrate 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate;
+}
+@keyframes sack-celebrate {
+  from { transform: scale(1) rotate(-6deg); filter: drop-shadow(0 0 12px #FFD700); }
+  to   { transform: scale(1.35) rotate(6deg); filter: drop-shadow(0 0 28px #FFD700); }
+}
+
+/* ======= DAILY DOUBLE OVERLAY ======= */
+.daily-double-overlay {
+  position: fixed;
+  inset: 0;
+  background: #050520;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.daily-double-overlay.hidden { display: none; }
+
+.dd-rays {
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 0deg,
+    #FFD700 0deg, #FFD700 10deg, transparent 10deg, transparent 22deg,
+    #FF8C00 22deg, #FF8C00 32deg, transparent 32deg, transparent 44deg,
+    #FFD700 44deg, #FFD700 54deg, transparent 54deg, transparent 66deg,
+    #FF8C00 66deg, #FF8C00 76deg, transparent 76deg, transparent 88deg,
+    #FFD700 88deg, #FFD700 98deg, transparent 98deg, transparent 110deg,
+    #FF8C00 110deg, #FF8C00 120deg, transparent 120deg, transparent 132deg,
+    #FFD700 132deg, #FFD700 142deg, transparent 142deg, transparent 154deg,
+    #FF8C00 154deg, #FF8C00 164deg, transparent 164deg, transparent 176deg,
+    #FFD700 176deg, #FFD700 186deg, transparent 186deg, transparent 198deg,
+    #FF8C00 198deg, #FF8C00 208deg, transparent 208deg, transparent 220deg,
+    #FFD700 220deg, #FFD700 230deg, transparent 230deg, transparent 242deg,
+    #FF8C00 242deg, #FF8C00 252deg, transparent 252deg, transparent 264deg,
+    #FFD700 264deg, #FFD700 274deg, transparent 274deg, transparent 286deg,
+    #FF8C00 286deg, #FF8C00 296deg, transparent 296deg, transparent 308deg,
+    #FFD700 308deg, #FFD700 318deg, transparent 318deg, transparent 330deg,
+    #FF8C00 330deg, #FF8C00 340deg, transparent 340deg, transparent 352deg,
+    #FFD700 352deg, #FFD700 360deg
+  );
+  animation: dd-spin 5s linear infinite;
+  opacity: 0.22;
+}
+@keyframes dd-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.dd-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.dd-badge {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(56px, 14vw, 110px);
+  color: #FFD700;
+  text-shadow:
+    0 0 40px #FFD700,
+    0 0 80px rgba(255,215,0,0.6),
+    4px 4px 0 #8B6900,
+    -1px -1px 0 rgba(0,0,0,0.5);
+  line-height: 0.85;
+  animation: dd-zoom-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.dd-badge-sub {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(48px, 12vw, 92px);
+  color: #FF8C00;
+  text-shadow:
+    0 0 30px #FF8C00,
+    0 0 60px rgba(255,140,0,0.5),
+    3px 3px 0 #7A3500;
+  line-height: 0.9;
+  animation: dd-zoom-in 0.45s 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes dd-zoom-in {
+  from { transform: scale(0.1) rotate(-8deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.dd-stars {
+  font-size: 36px;
+  animation: dd-spin 1.2s linear infinite;
+  margin-top: 12px;
+}
+
+/* ======= CO-OP WINNER CARD ======= */
+.coop-winner-card { border-color: var(--neon-green); box-shadow: 0 0 40px rgba(0,255,136,0.4); }
+.coop-winner-card .w-points { color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green); }
+
 /* Final Jeopardy per-player correct toggle */
 .btn-score-player.final-pick { position: relative; }
 .btn-score-player .p-check {

@@ -1,5 +1,5 @@
 // =========================================
-//   SUPER JEOPARDY - GAME ENGINE
+//   SUPER JEOPARDY - GAME ENGINE  v4
 // =========================================
 
 const PLAYER_COLORS = [
@@ -18,15 +18,17 @@ const PLAYER_EMOJIS = [
   '🐋','🦈','🦅','🦚','🦜','🐬','🦩','🦒'
 ];
 
-const FINAL_VALUE = 1000; // Final Jeopardy is worth a flat $1000; nothing lost when wrong
+const FINAL_VALUE = 1000;
 
 let state = {
   players: [],
   board: [],
   currentQuestion: null,
   activePlayerIdx: 0,
-  finalJeopardy: null,      // the one chosen Final Jeopardy question (or null)
-  finalCorrect: new Set()   // player indices marked correct in Final Jeopardy
+  finalJeopardy: null,
+  finalCorrect: new Set(),
+  mode: 'competitive',   // 'competitive' | 'coop'
+  totalBoardValue: 0
 };
 
 // ======= NAVIGATION =======
@@ -36,22 +38,40 @@ function showScreen(id) {
 }
 
 // ======= LANDING =======
+function selectMode(m) {
+  state.mode = m;
+  document.getElementById('mode-btn-competitive').classList.toggle('active', m === 'competitive');
+  document.getElementById('mode-btn-coop').classList.toggle('active', m === 'coop');
+}
+
 function goToSetup() {
-  showScreen('screen-setup');
-  // Start with 8 blank slots — game starts once any one has a name
-  if (state.players.length === 0) {
-    for (let i = 0; i < 8; i++) addPlayerSlot(true);
-    renderPlayerSlots();
-    updateStartButton();
+  // Always reset players when entering setup
+  state.players = [];
+
+  const initCount = state.mode === 'coop' ? 1 : 8;
+  for (let i = 0; i < initCount; i++) addPlayerSlot(true);
+
+  if (state.mode === 'coop') {
+    document.querySelector('.setup-header h2').textContent = '🏫 Class Name';
+    document.querySelector('.setup-header p').textContent = 'Type the class name to play in Co-op mode!';
+    document.getElementById('btn-add-player').style.display = 'none';
+  } else {
+    document.querySelector('.setup-header h2').textContent = '👥 Who\'s Playing? 👥';
+    document.querySelector('.setup-header p').textContent = 'Type a name to join — blank slots are skipped. Up to 12 players!';
+    document.getElementById('btn-add-player').style.display = '';
   }
+
+  renderPlayerSlots();
+  updateStartButton();
+  showScreen('screen-setup');
 }
 
 const MAX_PLAYERS = 12;
 
 // ======= PLAYER SETUP =======
-// silent=true skips re-rendering (used when bulk-adding initial slots)
 function addPlayerSlot(silent = false) {
-  if (state.players.length >= MAX_PLAYERS) return;
+  const maxSlots = state.mode === 'coop' ? 1 : MAX_PLAYERS;
+  if (state.players.length >= maxSlots) return;
 
   const idx = state.players.length;
   state.players.push({
@@ -86,6 +106,7 @@ function renderPlayerSlots() {
   state.players.forEach((player, idx) => {
     const slot = document.createElement('div');
     slot.className = 'player-slot';
+    const label = state.mode === 'coop' ? 'Class name' : `Player ${idx + 1} name`;
     slot.innerHTML = `
       <div class="player-color-strip" style="--player-color: ${player.color}"></div>
       <div class="player-slot-top">
@@ -93,13 +114,13 @@ function renderPlayerSlots() {
         <input
           class="player-name-input"
           type="text"
-          placeholder="Player ${idx + 1} name"
+          placeholder="${label}"
           maxlength="20"
           value="${player.name}"
           oninput="updatePlayerName(${idx}, this.value)"
         >
       </div>
-      ${state.players.length > 1 ? `<button class="btn-remove-player" onclick="removePlayer(${idx})">✕</button>` : ''}
+      ${state.players.length > 1 && state.mode !== 'coop' ? `<button class="btn-remove-player" onclick="removePlayer(${idx})">✕</button>` : ''}
     `;
     grid.appendChild(slot);
   });
@@ -135,7 +156,6 @@ function openEmojiPicker(playerIdx) {
 
   picker.classList.remove('hidden');
 
-  // Close on outside click
   setTimeout(() => {
     document.addEventListener('click', closePicker, { once: true, capture: true });
   }, 10);
@@ -158,12 +178,10 @@ function selectEmoji(emoji) {
 
 // ======= GAME START =======
 async function startGame() {
-  // Drop any slots left blank — only named players join the game
   state.players = state.players.filter(p => p.name.trim().length > 0);
-  // Re-assign colors sequentially after filtering
   state.players.forEach((p, i) => { p.id = i; p.color = PLAYER_COLORS[i % PLAYER_COLORS.length]; });
 
-  if (state.players.length === 0) return; // shouldn't happen (button is disabled)
+  if (state.players.length === 0) return;
 
   try {
     const res = await fetch('/api/game');
@@ -174,6 +192,10 @@ async function startGame() {
     alert('Could not load questions. Is the server running?');
     return;
   }
+
+  // Sum all question values on the board
+  state.totalBoardValue = state.board.reduce((total, cat) =>
+    total + cat.questions.reduce((sum, q) => sum + q.points, 0), 0);
 
   state.players.forEach(p => { p.score = 0; });
   state.activePlayerIdx = 0;
@@ -188,13 +210,26 @@ async function startGame() {
 // ======= SCOREBOARD =======
 function renderScoreboard() {
   const sb = document.getElementById('scoreboard');
+  const coopSb = document.getElementById('coop-scoreboard');
+
+  if (state.mode === 'coop') {
+    sb.style.display = 'none';
+    coopSb.classList.remove('hidden');
+    const player = state.players[0] || { name: 'The Class', score: 0 };
+    document.getElementById('coop-class-name').textContent = player.name || 'The Class';
+    document.getElementById('coop-total-label').textContent = `$${state.totalBoardValue}`;
+    updateCoopBar(false);
+    return;
+  }
+
+  sb.style.display = '';
+  coopSb.classList.add('hidden');
   sb.innerHTML = '';
 
   state.players.forEach((player, idx) => {
     const card = document.createElement('div');
     card.className = 'score-card' + (idx === state.activePlayerIdx ? ' active-player' : '');
     card.id = `score-card-${idx}`;
-    // Clicking the card body (emoji/name) selects the active player
     card.onclick = () => setActivePlayer(idx);
     card.innerHTML = `
       <div class="score-emoji">${player.emoji}</div>
@@ -204,11 +239,9 @@ function renderScoreboard() {
     card.style.background = `linear-gradient(180deg, ${player.color}22, transparent)`;
     card.style.borderColor = idx === state.activePlayerIdx ? player.color : 'transparent';
 
-    // Clicking the points number opens an inline editor (brings up the keyboard
-    // on tablets) so a mis-click when awarding points can be corrected.
     const ptsEl = card.querySelector(`#score-pts-${idx}`);
     ptsEl.onclick = (e) => {
-      e.stopPropagation(); // don't also trigger setActivePlayer
+      e.stopPropagation();
       openScoreEditor(idx);
     };
 
@@ -224,7 +257,7 @@ function setActivePlayer(idx) {
 // Inline-edit a player's score to fix mistakes mid-game
 function openScoreEditor(idx) {
   const ptsEl = document.getElementById(`score-pts-${idx}`);
-  if (!ptsEl || ptsEl.querySelector('input')) return; // already editing
+  if (!ptsEl || ptsEl.querySelector('input')) return;
 
   const current = state.players[idx].score;
   ptsEl.innerHTML = `
@@ -250,22 +283,75 @@ function openScoreEditor(idx) {
   };
 }
 
+// ======= CO-OP PROGRESS BAR =======
+function updateCoopBar(animate = false) {
+  const player = state.players[0];
+  if (!player) return;
+
+  const score = Math.max(0, player.score);
+  const total = state.totalBoardValue || 7500;
+  const pct = Math.min(100, (score / total) * 100);
+
+  const scoreEl = document.getElementById('coop-score-num');
+  if (scoreEl && !scoreEl.querySelector('input')) {
+    scoreEl.textContent = `$${score}`;
+    scoreEl.title = 'Tap to fix the score';
+    scoreEl.style.cursor = 'pointer';
+    scoreEl.onclick = openCoopScoreEditor;
+  }
+
+  const fill = document.getElementById('coop-bar-fill');
+  if (fill) fill.style.width = `${pct}%`;
+
+  if (animate) {
+    const bounce = document.getElementById('coop-bar-bounce');
+    if (bounce) {
+      bounce.classList.remove('bar-excited');
+      void bounce.offsetWidth;
+      bounce.classList.add('bar-excited');
+      bounce.addEventListener('animationend', () => bounce.classList.remove('bar-excited'), { once: true });
+    }
+  }
+
+  const sack = document.getElementById('coop-sack');
+  if (sack) sack.classList.toggle('sack-full', pct >= 100);
+}
+
+function openCoopScoreEditor() {
+  const el = document.getElementById('coop-score-num');
+  if (!el || el.querySelector('input')) return;
+
+  const current = state.players[0]?.score ?? 0;
+  el.innerHTML = `<input class="score-edit-input" type="number" inputmode="numeric" value="${current}" style="width:90px;font-size:22px;">`;
+  const input = el.querySelector('input');
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const val = parseInt(input.value, 10);
+    if (!Number.isNaN(val) && state.players[0]) state.players[0].score = val;
+    updateCoopBar(false);
+  };
+  input.onblur = commit;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    else if (e.key === 'Escape') { input.onblur = null; updateCoopBar(false); }
+  };
+}
+
 function animateScoreChange(playerIdx, delta) {
   const el = document.getElementById(`score-pts-${playerIdx}`);
   if (!el) return;
-
   el.classList.remove('animating');
-  void el.offsetWidth; // reflow
+  void el.offsetWidth;
   el.classList.add('animating');
   el.textContent = state.players[playerIdx].score;
 
-  // Float particle
   const card = document.getElementById(`score-card-${playerIdx}`);
   if (card) {
     const rect = card.getBoundingClientRect();
     spawnFloatParticle(
-      rect.left + rect.width / 2,
-      rect.top,
+      rect.left + rect.width / 2, rect.top,
       delta > 0 ? `+${delta}` : `${delta}`,
       delta > 0 ? '#00FF88' : '#FF4444'
     );
@@ -300,11 +386,8 @@ function darkenHex(hex, factor = 0.45) {
 function renderBoard() {
   const board = document.getElementById('game-board');
   board.innerHTML = '';
-
-  // 6 rows: 1 header + 5 question rows
   board.style.gridTemplateRows = `auto repeat(5, 1fr)`;
 
-  // Headers
   state.board.forEach((cat, catIdx) => {
     const header = document.createElement('div');
     header.className = 'board-header';
@@ -319,7 +402,6 @@ function renderBoard() {
     board.appendChild(header);
   });
 
-  // Question cells (row by row: 100, 200, 300, 400, 500)
   for (let row = 0; row < 5; row++) {
     state.board.forEach((cat, catIdx) => {
       const q = cat.questions[row];
@@ -351,25 +433,39 @@ function updateCell(catIdx, row) {
   }
 }
 
+// ======= DAILY DOUBLE =======
+function showDailyDoubleOverlay(callback) {
+  const overlay = document.getElementById('daily-double-overlay');
+  overlay.classList.remove('hidden');
+  setTimeout(() => {
+    overlay.classList.add('hidden');
+    callback();
+  }, 2600);
+}
+
 // ======= QUESTION FLOW =======
 function openQuestion(catIdx, rowIdx) {
   const cat = state.board[catIdx];
   const q = cat.questions[rowIdx];
-
   state.currentQuestion = { catIdx, rowIdx, q, cat };
 
-  // Set up question screen
+  if (q.dailyDouble) {
+    showDailyDoubleOverlay(() => presentQuestion(cat, q));
+  } else {
+    presentQuestion(cat, q);
+  }
+}
+
+function presentQuestion(cat, q) {
   document.getElementById('q-category-badge').textContent = `${cat.icon} ${cat.name}`;
   document.getElementById('q-points-badge').textContent = `$${q.points}`;
   document.getElementById('question-text').textContent = q.question;
   document.getElementById('answer-text').textContent = q.answer;
   document.getElementById('hint-text').textContent = q.hint ? `💡 Hint: ${q.hint}` : '';
 
-  // Reset state
   document.getElementById('answer-reveal').classList.add('hidden');
   document.getElementById('question-actions').style.display = 'flex';
 
-  // Build scoring buttons
   const scoringBtns = document.getElementById('scoring-buttons');
   scoringBtns.innerHTML = '';
   state.players.forEach((player, idx) => {
@@ -396,15 +492,14 @@ function revealAnswer() {
 function awardPoints(playerIdx, points) {
   state.players[playerIdx].score += points;
 
-  // Mark question answered
   const { catIdx, rowIdx } = state.currentQuestion;
   state.board[catIdx].questions[rowIdx].answered = true;
 
-  // Show celebration
   showCelebration(state.players[playerIdx], points);
 
-  // Move to next player
-  state.activePlayerIdx = (playerIdx + 1) % state.players.length;
+  if (state.mode !== 'coop') {
+    state.activePlayerIdx = (playerIdx + 1) % state.players.length;
+  }
 
   setTimeout(() => {
     hideCelebration();
@@ -426,11 +521,15 @@ function nobodyGotIt() {
 function returnToBoard() {
   const { catIdx, rowIdx } = state.currentQuestion;
   updateCell(catIdx, rowIdx);
-  renderScoreboard();
+
+  if (state.mode === 'coop') {
+    updateCoopBar(true);
+  } else {
+    renderScoreboard();
+  }
 
   showScreen('screen-board');
 
-  // Check if all answered → Final Jeopardy (if there's a question), else winner
   const allDone = state.board.every(cat => cat.questions.every(q => q.answered));
   if (allDone) {
     setTimeout(() => {
@@ -445,17 +544,14 @@ function startFinalJeopardy() {
   const fj = state.finalJeopardy;
   state.finalCorrect = new Set();
 
-  // Phase reset
   document.getElementById('final-intro').classList.remove('hidden');
   document.getElementById('final-question-phase').classList.add('hidden');
   document.getElementById('final-answer-reveal').classList.add('hidden');
   document.getElementById('final-q-actions').style.display = 'flex';
 
-  // Category label
   const catLabel = fj.category && fj.category.trim() ? fj.category : 'Final Jeopardy';
   document.getElementById('final-category').textContent = `📋 ${catLabel}`;
 
-  // Standings (sorted high → low)
   const standings = document.getElementById('final-standings');
   standings.innerHTML = '';
   [...state.players]
@@ -494,7 +590,6 @@ function finalRevealAnswer() {
   document.getElementById('final-q-actions').style.display = 'none';
   document.getElementById('final-answer-reveal').classList.remove('hidden');
 
-  // Build a toggle button per player — tap everyone who got it right
   const btns = document.getElementById('final-scoring-buttons');
   btns.innerHTML = '';
   state.players.forEach((player, idx) => {
@@ -537,10 +632,7 @@ function showCelebration(player, points) {
   document.getElementById('celebration-emoji').textContent = player.emoji;
   document.getElementById('celebration-text').textContent = `${player.name.toUpperCase()}!`;
   document.getElementById('celebration-points').textContent = `+$${points}`;
-
   overlay.classList.remove('hidden');
-
-  // Confetti burst
   Confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 100, 22);
 }
 
@@ -557,11 +649,14 @@ function hideWrongOverlay() {
 
 // ======= WINNER SCREEN =======
 function showWinner() {
+  if (state.mode === 'coop') {
+    showCoopWinner();
+    return;
+  }
+
   const sorted = [...state.players].sort((a, b) => b.score - a.score);
   const maxScore = sorted[0].score;
-  const winners = sorted.filter(p => p.score === maxScore);
 
-  // Winner display
   const winnerDisplay = document.getElementById('winner-display');
   winnerDisplay.innerHTML = '';
 
@@ -574,7 +669,6 @@ function showWinner() {
     prevScore = player.score;
 
     if (i === 0) {
-      // Main winner card
       const card = document.createElement('div');
       card.className = 'winner-card';
       card.style.animationDelay = `${i * 0.15}s`;
@@ -588,7 +682,6 @@ function showWinner() {
     }
   });
 
-  // Final scores list
   const finalScores = document.getElementById('final-scores');
   finalScores.innerHTML = '';
   sorted.forEach((player, i) => {
@@ -604,15 +697,38 @@ function showWinner() {
   });
 
   showScreen('screen-winner');
+  setTimeout(() => Confetti.megaBurst(), 300);
+  setTimeout(() => Confetti.rain(5000), 800);
+}
 
-  // BIG celebration!
+function showCoopWinner() {
+  const player = state.players[0] || { name: 'The Class', score: 0, emoji: '🎉' };
+  const maxPossible = state.totalBoardValue + (state.finalJeopardy ? FINAL_VALUE : 0);
+
+  document.getElementById('winner-display').innerHTML = `
+    <div class="winner-card coop-winner-card">
+      <div class="w-rank">💰</div>
+      <div class="w-emoji">${player.emoji}</div>
+      <div class="w-name">${player.name}</div>
+      <div class="w-points">$${player.score}</div>
+    </div>
+  `;
+
+  document.getElementById('final-scores').innerHTML = `
+    <div class="final-score-item">
+      <span>${player.emoji}</span>
+      <span>${player.name}</span>
+      <span class="fs-points">$${player.score} out of $${maxPossible} possible!</span>
+    </div>
+  `;
+
+  showScreen('screen-winner');
   setTimeout(() => Confetti.megaBurst(), 300);
   setTimeout(() => Confetti.rain(5000), 800);
 }
 
 // ======= INIT =======
 document.addEventListener('DOMContentLoaded', () => {
-  // Show landing with stars
   showScreen('screen-landing');
   const landing = document.getElementById('screen-landing');
   const starsDiv = document.createElement('div');

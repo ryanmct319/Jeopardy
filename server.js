@@ -74,6 +74,17 @@ app.get('/api/game', (req, res) => {
     };
   });
 
+  // Mark 3 random Daily Doubles in $300+ slots
+  const ddEligible = [];
+  gameBoard.forEach((cat, ci) => {
+    cat.questions.forEach((q, ri) => {
+      if (q.points >= 300) ddEligible.push([ci, ri]);
+    });
+  });
+  shuffle(ddEligible).slice(0, 3).forEach(([ci, ri]) => {
+    gameBoard[ci].questions[ri].dailyDouble = true;
+  });
+
   // Pick one random Final Jeopardy question, if any have been entered
   let finalJeopardy = null;
   if (data.finalJeopardy.length > 0) {

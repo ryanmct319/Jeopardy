@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌟 Super Jeopardy! 🌟</title>
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -20,6 +20,10 @@
         <div class="logo-sparkle right">✨</div>
       </div>
       <div class="logo-subtitle">🎉 End of Year Review 🎉</div>
+      <div class="mode-select">
+        <button class="btn-mode active" id="mode-btn-competitive" onclick="selectMode('competitive')">🏆 Competitive</button>
+        <button class="btn-mode" id="mode-btn-coop" onclick="selectMode('coop')">🤝 Co-op Class</button>
+      </div>
       <button class="btn-huge btn-start pulse-btn" onclick="goToSetup()">
         🚀 LET'S PLAY! 🚀
       </button>
@@ -52,8 +56,28 @@
 
   <!-- ====== GAME BOARD SCREEN ====== -->
   <div id="screen-board" class="screen">
-    <!-- Scoreboard -->
+    <!-- Competitive scoreboard -->
     <div id="scoreboard" class="scoreboard"></div>
+
+    <!-- Co-op scoreboard (shown instead in co-op mode) -->
+    <div id="coop-scoreboard" class="coop-scoreboard hidden">
+      <div class="coop-score-left">
+        <div class="coop-class-name" id="coop-class-name">The Class</div>
+        <div class="coop-score-num" id="coop-score-num">$0</div>
+      </div>
+      <div class="coop-bar-wrapper">
+        <div class="coop-bar-track">
+          <div class="coop-bar-bounce" id="coop-bar-bounce">
+            <div class="coop-bar-fill" id="coop-bar-fill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="coop-bar-labels">
+          <span>$0</span>
+          <span id="coop-total-label">$7500</span>
+        </div>
+      </div>
+      <div class="coop-sack" id="coop-sack">💰</div>
+    </div>
 
     <!-- Board -->
     <div id="game-board" class="game-board"></div>
@@ -165,7 +189,17 @@
   <!-- Canvas for confetti -->
   <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
 
-  <script src="js/confetti.js?v=3"></script>
-  <script src="js/game.js?v=3"></script>
+  <!-- ====== DAILY DOUBLE OVERLAY ====== -->
+  <div id="daily-double-overlay" class="daily-double-overlay hidden">
+    <div class="dd-rays"></div>
+    <div class="dd-content">
+      <div class="dd-badge">DAILY</div>
+      <div class="dd-badge-sub">DOUBLE!</div>
+      <div class="dd-stars">⭐ ⭐ ⭐</div>
+    </div>
+  </div>
+
+  <script src="js/confetti.js?v=4"></script>
+  <script src="js/game.js?v=4"></script>
 </body>
 </html>
