@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌟 Super Jeopardy! 🌟</title>
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -95,18 +95,10 @@
       <div class="question-card" id="question-card">
         <div class="question-text" id="question-text"></div>
       </div>
-      <div class="question-actions" id="question-actions">
-        <button class="btn-reveal" onclick="revealAnswer()">
-          🔍 Show Answer!
-        </button>
-      </div>
+      <div class="question-actions" id="question-actions"></div>
 
-      <!-- Co-op scoring panel (shown instead of player buttons in Co-op mode) -->
-      <div id="coop-question-panel" class="coop-question-panel hidden">
-        <div class="coop-q-label" id="coop-q-label">Did the class get it? 🌟</div>
-        <div class="coop-q-hint hidden" id="coop-q-hint"></div>
-        <div class="coop-q-buttons" id="coop-q-buttons"></div>
-      </div>
+      <!-- Co-op hint box (revealed when "I need a hint" is pressed) -->
+      <div id="coop-hint-box" class="coop-hint-box hidden"></div>
     </div>
 
     <!-- Answer reveal -->
@@ -114,10 +106,14 @@
       <div class="answer-label">✅ ANSWER:</div>
       <div class="answer-text" id="answer-text"></div>
       <div class="hint-text" id="hint-text"></div>
-      <div class="scoring-panel">
+      <div class="scoring-panel" id="scoring-panel-competitive">
         <div class="scoring-label">Who got it right? 🌟</div>
         <div id="scoring-buttons" class="scoring-buttons"></div>
         <button class="btn-nobody" onclick="nobodyGotIt()">😅 Nobody Got It</button>
+      </div>
+      <div class="scoring-panel hidden" id="scoring-panel-coop">
+        <div class="scoring-label">Did the class get it? Bank the money! 🌟</div>
+        <button class="btn-coop-got" id="btn-coop-bank" onclick="coopBank()">🏦 BANK!</button>
       </div>
     </div>
   </div>
@@ -206,7 +202,7 @@
     </div>
   </div>
 
-  <script src="js/confetti.js?v=5"></script>
-  <script src="js/game.js?v=5"></script>
+  <script src="js/confetti.js?v=6"></script>
+  <script src="js/game.js?v=6"></script>
 </body>
 </html>

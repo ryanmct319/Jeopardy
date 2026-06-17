@@ -469,23 +469,22 @@ function presentQuestion(cat, q) {
   document.getElementById('hint-text').textContent = q.hint ? `💡 Hint: ${q.hint}` : '';
 
   document.getElementById('answer-reveal').classList.add('hidden');
+  document.getElementById('coop-hint-box').classList.add('hidden');
+  document.getElementById('coop-hint-box').innerHTML = '';
 
+  // Both modes start the same way: a question with a "Show Answer" button.
+  // Co-op also offers a hint up front; the answer is always shown before banking.
+  const actions = document.getElementById('question-actions');
+  actions.style.display = 'flex';
   if (state.mode === 'coop') {
-    // Co-op: no per-player tap. Show "I got it!" / "I need a hint" right away.
-    document.getElementById('question-actions').style.display = 'none';
-    document.getElementById('coop-question-panel').classList.remove('hidden');
-    document.getElementById('coop-q-label').textContent = 'Did the class get it? 🌟';
-    const hintEl = document.getElementById('coop-q-hint');
-    hintEl.classList.add('hidden');
-    hintEl.textContent = '';
-    document.getElementById('coop-q-buttons').innerHTML = `
-      <button class="btn-coop-got" onclick="coopGotIt()">🙌 I got it!</button>
+    actions.innerHTML = `
+      <button class="btn-reveal" onclick="revealAnswer()">🔍 Show Answer!</button>
       <button class="btn-coop-hint" onclick="coopNeedHint()">🤔 I need a hint</button>
     `;
   } else {
-    document.getElementById('coop-question-panel').classList.add('hidden');
-    document.getElementById('question-actions').style.display = 'flex';
+    actions.innerHTML = `<button class="btn-reveal" onclick="revealAnswer()">🔍 Show Answer!</button>`;
 
+    // Pre-build the per-player banking buttons (revealed alongside the answer)
     const scoringBtns = document.getElementById('scoring-buttons');
     scoringBtns.innerHTML = '';
     state.players.forEach((player, idx) => {
@@ -507,7 +506,22 @@ function presentQuestion(cat, q) {
 
 function revealAnswer() {
   document.getElementById('question-actions').style.display = 'none';
+  document.getElementById('coop-hint-box').classList.add('hidden');
   document.getElementById('answer-reveal').classList.remove('hidden');
+
+  const comp = document.getElementById('scoring-panel-competitive');
+  const coop = document.getElementById('scoring-panel-coop');
+
+  if (state.mode === 'coop') {
+    comp.classList.add('hidden');
+    coop.classList.remove('hidden');
+    const q = state.currentQuestion.q;
+    const amount = q.dailyDouble ? DAILY_DOUBLE_VALUE : q.points;
+    document.getElementById('btn-coop-bank').textContent = `🏦 BANK $${amount}!`;
+  } else {
+    coop.classList.add('hidden');
+    comp.classList.remove('hidden');
+  }
 }
 
 function awardPoints(playerIdx, points) {
@@ -542,24 +556,26 @@ function nobodyGotIt() {
 // ======= CO-OP QUESTION HANDLERS =======
 function coopNeedHint() {
   const q = state.currentQuestion.q;
-  document.getElementById('coop-q-label').textContent = '👂 Listen to the hint from your host!';
-  const hintEl = document.getElementById('coop-q-hint');
-  hintEl.textContent = q.hint ? `💡 ${q.hint}` : '💡 (Host: give the class a clue!)';
-  hintEl.classList.remove('hidden');
-  // After the hint, only "I got it!" remains
-  document.getElementById('coop-q-buttons').innerHTML =
-    `<button class="btn-coop-got" onclick="coopGotIt()">🙌 I got it!</button>`;
+  const box = document.getElementById('coop-hint-box');
+  box.innerHTML = `
+    <div class="coop-hint-host">👂 Listen to the hint from your host!</div>
+    <div class="coop-hint-text">${q.hint ? '💡 ' + q.hint : '💡 (Host: give the class a clue!)'}</div>
+  `;
+  box.classList.remove('hidden');
+  // The hint has been given — leave just "Show Answer" so the answer is shown before banking
+  document.getElementById('question-actions').innerHTML =
+    `<button class="btn-reveal" onclick="revealAnswer()">🔍 Show Answer!</button>`;
 }
 
-function coopGotIt() {
+function coopBank() {
   const { catIdx, rowIdx, q } = state.currentQuestion;
   const points = q.dailyDouble ? DAILY_DOUBLE_VALUE : q.points;
 
   state.players[0].score += points;
   state.board[catIdx].questions[rowIdx].answered = true;
 
-  // Hide the panel so it doesn't sit behind the popup
-  document.getElementById('coop-question-panel').classList.add('hidden');
+  // Hide the answer panel so it doesn't sit behind the popup
+  document.getElementById('answer-reveal').classList.add('hidden');
 
   // 1) Pop the dollar amount with confetti
   showCoopBankPopup(points);
