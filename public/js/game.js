@@ -474,6 +474,9 @@ function presentQuestion(cat, q) {
 
   // Both modes start the same way: a question with a "Show Answer" button.
   // Co-op also offers a hint up front; the answer is always shown before banking.
+  // Skip button is co-op only and available throughout the question
+  document.getElementById('coop-skip-btn').classList.toggle('hidden', state.mode !== 'coop');
+
   const actions = document.getElementById('question-actions');
   actions.style.display = 'flex';
   if (state.mode === 'coop') {
@@ -574,8 +577,9 @@ function coopBank() {
   state.players[0].score += points;
   state.board[catIdx].questions[rowIdx].answered = true;
 
-  // Hide the answer panel so it doesn't sit behind the popup
+  // Hide the answer panel + skip so they don't sit behind the popup
   document.getElementById('answer-reveal').classList.add('hidden');
+  document.getElementById('coop-skip-btn').classList.add('hidden');
 
   // 1) Pop the dollar amount with confetti
   showCoopBankPopup(points);
@@ -596,6 +600,32 @@ function coopBank() {
       }
     });
   }, 1300);
+}
+
+// Co-op: skip a question without banking any money (the "nobody got it" path)
+function coopSkip() {
+  const { catIdx, rowIdx } = state.currentQuestion;
+  state.board[catIdx].questions[rowIdx].answered = true;
+
+  document.getElementById('answer-reveal').classList.add('hidden');
+  document.getElementById('coop-hint-box').classList.add('hidden');
+  document.getElementById('coop-skip-btn').classList.add('hidden');
+
+  showWrongOverlay();
+  setTimeout(() => {
+    hideWrongOverlay();
+    updateCell(catIdx, rowIdx);
+    showScreen('screen-board');
+    updateCoopBar(false);
+
+    const allDone = state.board.every(cat => cat.questions.every(qq => qq.answered));
+    if (allDone) {
+      setTimeout(() => {
+        if (state.finalJeopardy) startFinalJeopardy();
+        else showWinner();
+      }, 800);
+    }
+  }, 1200);
 }
 
 function showCoopBankPopup(points) {

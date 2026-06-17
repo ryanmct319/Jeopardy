@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌟 Super Jeopardy! 🌟</title>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -111,11 +111,13 @@
         <div id="scoring-buttons" class="scoring-buttons"></div>
         <button class="btn-nobody" onclick="nobodyGotIt()">😅 Nobody Got It</button>
       </div>
-      <div class="scoring-panel hidden" id="scoring-panel-coop">
-        <div class="scoring-label">Did the class get it? Bank the money! 🌟</div>
+      <div class="coop-bank-wrap hidden" id="scoring-panel-coop">
         <button class="btn-coop-got" id="btn-coop-bank" onclick="coopBank()">🏦 BANK!</button>
       </div>
     </div>
+
+    <!-- Co-op skip (replaces "nobody got it") -->
+    <button id="coop-skip-btn" class="btn-skip hidden" onclick="coopSkip()">SKIP →</button>
   </div>
 
   <!-- ====== FINAL JEOPARDY SCREEN ====== -->
@@ -202,7 +204,7 @@
     </div>
   </div>
 
-  <script src="js/confetti.js?v=6"></script>
-  <script src="js/game.js?v=6"></script>
+  <script src="js/confetti.js?v=7"></script>
+  <script src="js/game.js?v=7"></script>
 </body>
 </html>

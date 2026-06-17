@@ -1433,6 +1433,37 @@ body {
 }
 .btn-coop-got:active, .btn-coop-hint:active { transform: scale(0.95); }
 
+/* Co-op BANK button sits on its own — no boxed panel, keeps focus on the answer */
+.coop-bank-wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.coop-bank-wrap.hidden { display: none; }
+#btn-coop-bank { font-size: clamp(24px, 4.5vw, 38px); padding: 20px 56px; }
+
+/* Red SKIP button, bottom-right of the question screen (co-op) */
+.btn-skip {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #FF4444, #CC0000);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  letter-spacing: 1px;
+  padding: 12px 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(255,68,68,0.5);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 5;
+}
+.btn-skip:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 6px 26px rgba(255,68,68,0.85); }
+.btn-skip:active { transform: scale(0.95); }
+.btn-skip.hidden { display: none; }
+
 /* Cash that flies into the money sack when the class banks points */
 .fly-cash {
   position: fixed;
