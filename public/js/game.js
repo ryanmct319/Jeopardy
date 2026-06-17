@@ -19,6 +19,7 @@ const PLAYER_EMOJIS = [
 ];
 
 const FINAL_VALUE = 1000;
+const DAILY_DOUBLE_VALUE = 1000; // Daily Doubles always award a flat $1000
 
 let state = {
   players: [],
@@ -193,9 +194,10 @@ async function startGame() {
     return;
   }
 
-  // Sum all question values on the board
+  // Sum all question values on the board (Daily Doubles count as their $1000 payout
+  // so the co-op bar fills to exactly 100% once everything is banked)
   state.totalBoardValue = state.board.reduce((total, cat) =>
-    total + cat.questions.reduce((sum, q) => sum + q.points, 0), 0);
+    total + cat.questions.reduce((sum, q) => sum + (q.dailyDouble ? DAILY_DOUBLE_VALUE : q.points), 0), 0);
 
   state.players.forEach(p => { p.score = 0; });
   state.activePlayerIdx = 0;
@@ -457,29 +459,48 @@ function openQuestion(catIdx, rowIdx) {
 }
 
 function presentQuestion(cat, q) {
+  // Daily Doubles always pay a flat $1000 regardless of the tile value
+  const awardValue = q.dailyDouble ? DAILY_DOUBLE_VALUE : q.points;
+
   document.getElementById('q-category-badge').textContent = `${cat.icon} ${cat.name}`;
-  document.getElementById('q-points-badge').textContent = `$${q.points}`;
+  document.getElementById('q-points-badge').textContent = `$${awardValue}`;
   document.getElementById('question-text').textContent = q.question;
   document.getElementById('answer-text').textContent = q.answer;
   document.getElementById('hint-text').textContent = q.hint ? `💡 Hint: ${q.hint}` : '';
 
   document.getElementById('answer-reveal').classList.add('hidden');
-  document.getElementById('question-actions').style.display = 'flex';
 
-  const scoringBtns = document.getElementById('scoring-buttons');
-  scoringBtns.innerHTML = '';
-  state.players.forEach((player, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'btn-score-player';
-    btn.style.borderColor = player.color;
-    btn.style.color = player.color;
-    btn.innerHTML = `
-      <span class="p-emoji">${player.emoji}</span>
-      <span class="p-name">${player.name}</span>
+  if (state.mode === 'coop') {
+    // Co-op: no per-player tap. Show "I got it!" / "I need a hint" right away.
+    document.getElementById('question-actions').style.display = 'none';
+    document.getElementById('coop-question-panel').classList.remove('hidden');
+    document.getElementById('coop-q-label').textContent = 'Did the class get it? 🌟';
+    const hintEl = document.getElementById('coop-q-hint');
+    hintEl.classList.add('hidden');
+    hintEl.textContent = '';
+    document.getElementById('coop-q-buttons').innerHTML = `
+      <button class="btn-coop-got" onclick="coopGotIt()">🙌 I got it!</button>
+      <button class="btn-coop-hint" onclick="coopNeedHint()">🤔 I need a hint</button>
     `;
-    btn.onclick = () => awardPoints(idx, q.points);
-    scoringBtns.appendChild(btn);
-  });
+  } else {
+    document.getElementById('coop-question-panel').classList.add('hidden');
+    document.getElementById('question-actions').style.display = 'flex';
+
+    const scoringBtns = document.getElementById('scoring-buttons');
+    scoringBtns.innerHTML = '';
+    state.players.forEach((player, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-score-player';
+      btn.style.borderColor = player.color;
+      btn.style.color = player.color;
+      btn.innerHTML = `
+        <span class="p-emoji">${player.emoji}</span>
+        <span class="p-name">${player.name}</span>
+      `;
+      btn.onclick = () => awardPoints(idx, awardValue);
+      scoringBtns.appendChild(btn);
+    });
+  }
 
   showScreen('screen-question');
 }
@@ -516,6 +537,93 @@ function nobodyGotIt() {
     hideWrongOverlay();
     returnToBoard();
   }, 1500);
+}
+
+// ======= CO-OP QUESTION HANDLERS =======
+function coopNeedHint() {
+  const q = state.currentQuestion.q;
+  document.getElementById('coop-q-label').textContent = '👂 Listen to the hint from your host!';
+  const hintEl = document.getElementById('coop-q-hint');
+  hintEl.textContent = q.hint ? `💡 ${q.hint}` : '💡 (Host: give the class a clue!)';
+  hintEl.classList.remove('hidden');
+  // After the hint, only "I got it!" remains
+  document.getElementById('coop-q-buttons').innerHTML =
+    `<button class="btn-coop-got" onclick="coopGotIt()">🙌 I got it!</button>`;
+}
+
+function coopGotIt() {
+  const { catIdx, rowIdx, q } = state.currentQuestion;
+  const points = q.dailyDouble ? DAILY_DOUBLE_VALUE : q.points;
+
+  state.players[0].score += points;
+  state.board[catIdx].questions[rowIdx].answered = true;
+
+  // Hide the panel so it doesn't sit behind the popup
+  document.getElementById('coop-question-panel').classList.add('hidden');
+
+  // 1) Pop the dollar amount with confetti
+  showCoopBankPopup(points);
+
+  // 2) Return to the board and bank the cash into the money sack
+  setTimeout(() => {
+    hideCelebration();
+    updateCell(catIdx, rowIdx);
+    showScreen('screen-board');
+
+    flyCashToSack(points, () => {
+      const allDone = state.board.every(cat => cat.questions.every(qq => qq.answered));
+      if (allDone) {
+        setTimeout(() => {
+          if (state.finalJeopardy) startFinalJeopardy();
+          else showWinner();
+        }, 1000);
+      }
+    });
+  }, 1300);
+}
+
+function showCoopBankPopup(points) {
+  const overlay = document.getElementById('celebration-overlay');
+  document.getElementById('celebration-emoji').textContent = '💰';
+  document.getElementById('celebration-text').textContent = `+$${points}`;
+  document.getElementById('celebration-points').textContent = '🏦 BANKED!';
+  overlay.classList.remove('hidden');
+  Confetti.burst(window.innerWidth / 2, window.innerHeight / 2, 100, 22);
+}
+
+// Animate the banked dollar amount flying into the money sack on the scoreboard
+function flyCashToSack(amount, done) {
+  const sack = document.getElementById('coop-sack');
+  const fly = document.createElement('div');
+  fly.className = 'fly-cash';
+  fly.textContent = `💵 $${amount}`;
+
+  const startX = window.innerWidth / 2;
+  const startY = window.innerHeight / 2;
+  fly.style.left = startX + 'px';
+  fly.style.top = startY + 'px';
+  document.body.appendChild(fly);
+
+  const r = sack.getBoundingClientRect();
+  const dx = (r.left + r.width / 2) - startX;
+  const dy = (r.top + r.height / 2) - startY;
+
+  let finished = false;
+  const arrive = () => {
+    if (finished) return;
+    finished = true;
+    fly.remove();
+    updateCoopBar(true); // grow the bar with an excited bounce
+    if (done) done();
+  };
+
+  requestAnimationFrame(() => {
+    fly.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px) scale(0.2)`;
+    fly.style.opacity = '0.15';
+  });
+  fly.addEventListener('transitionend', arrive, { once: true });
+  // Safety net in case transitionend doesn't fire
+  setTimeout(arrive, 1100);
 }
 
 function returnToBoard() {

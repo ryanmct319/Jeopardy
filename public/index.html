@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🌟 Super Jeopardy! 🌟</title>
-  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/style.css?v=5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </head>
@@ -99,6 +99,13 @@
         <button class="btn-reveal" onclick="revealAnswer()">
           🔍 Show Answer!
         </button>
+      </div>
+
+      <!-- Co-op scoring panel (shown instead of player buttons in Co-op mode) -->
+      <div id="coop-question-panel" class="coop-question-panel hidden">
+        <div class="coop-q-label" id="coop-q-label">Did the class get it? 🌟</div>
+        <div class="coop-q-hint hidden" id="coop-q-hint"></div>
+        <div class="coop-q-buttons" id="coop-q-buttons"></div>
       </div>
     </div>
 
@@ -199,7 +206,7 @@
     </div>
   </div>
 
-  <script src="js/confetti.js?v=4"></script>
-  <script src="js/game.js?v=4"></script>
+  <script src="js/confetti.js?v=5"></script>
+  <script src="js/game.js?v=5"></script>
 </body>
 </html>

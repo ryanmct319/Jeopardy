@@ -1384,6 +1384,91 @@ body {
   margin-top: 12px;
 }
 
+/* ======= CO-OP QUESTION PANEL ======= */
+.coop-question-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 720px;
+  animation: answer-slide-up 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.coop-question-panel.hidden { display: none; }
+
+.coop-q-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(22px, 4vw, 34px);
+  color: white;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.coop-q-hint {
+  font-size: clamp(17px, 3vw, 25px);
+  font-weight: 800;
+  color: #FFE600;
+  text-align: center;
+  background: rgba(255,230,0,0.1);
+  border: 2px solid rgba(255,230,0,0.35);
+  border-radius: 18px;
+  padding: 16px 26px;
+  max-width: 620px;
+  animation: answer-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.coop-q-hint.hidden { display: none; }
+
+.coop-q-buttons {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-coop-got, .btn-coop-hint {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(20px, 3.5vw, 30px);
+  padding: 18px 42px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+}
+.btn-coop-got {
+  background: linear-gradient(135deg, #00FF88, #00CCAA);
+  color: var(--blue-deep);
+  box-shadow: 0 6px 30px rgba(0,255,136,0.5);
+}
+.btn-coop-got:hover {
+  transform: scale(1.08) translateY(-4px);
+  box-shadow: 0 10px 44px rgba(0,255,136,0.85);
+}
+.btn-coop-hint {
+  background: linear-gradient(135deg, #FFD93D, #FF9F1C);
+  color: #5a3500;
+  box-shadow: 0 6px 30px rgba(255,159,28,0.5);
+}
+.btn-coop-hint:hover {
+  transform: scale(1.08) translateY(-4px);
+  box-shadow: 0 10px 44px rgba(255,159,28,0.85);
+}
+.btn-coop-got:active, .btn-coop-hint:active { transform: scale(0.95); }
+
+/* Cash that flies into the money sack when the class banks points */
+.fly-cash {
+  position: fixed;
+  z-index: 500;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 5vw, 44px);
+  color: var(--neon-green);
+  text-shadow: 0 0 16px var(--neon-green), 0 2px 6px rgba(0,0,0,0.4);
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform 0.95s cubic-bezier(0.5, -0.2, 0.85, 0.6), opacity 0.95s ease-in;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 /* ======= CO-OP WINNER CARD ======= */
 .coop-winner-card { border-color: var(--neon-green); box-shadow: 0 0 40px rgba(0,255,136,0.4); }
 .coop-winner-card .w-points { color: var(--neon-green); text-shadow: 0 0 20px var(--neon-green); }
